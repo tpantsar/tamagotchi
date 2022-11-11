@@ -1,12 +1,12 @@
 
-XOPTS = -I"C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/" -Dxdc_target_types__=C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/targets/arm/elf/std.h -Dxdc_target_name__=M3
+XOPTS = -I"C:/ti/xdctools_3_32_00_06_core/packages/" -Dxdc_target_types__=C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/targets/arm/elf/std.h -Dxdc_target_name__=M3
 
 vpath % C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/
-vpath %.c C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/
+vpath %.c C:/ti/xdctools_3_32_00_06_core/packages/
 
 CCOPTS    = --endian=little -mv7M3 --abi=eabi -q -ms --opt_for_speed=0  --program_level_compile -o3 -g --optimize_with_debug  -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U
 
-XDC_ROOT  = C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/
+XDC_ROOT  = C:/ti/xdctools_3_32_00_06_core/packages/
 
 BIOS_ROOT = C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/
 
@@ -16,14 +16,14 @@ BIOS_INC  = -I"C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/pa
 
 TARGET_INC = -I"C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/"
 
-INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/Users/tomi_/workspace_v10/empty_CC2650STK_TI" --include_path="C:/Users/tomi_/workspace_v10/empty_CC2650STK_TI" --include_path="C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272" --include_path="C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include"  -IC:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ 
+INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/Users/tomi_/Desktop/workspace_v10/empty_CC2650STK_TI" --include_path="C:/Users/tomi_/Desktop/workspace_v10/empty_CC2650STK_TI" --include_path="C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272" --include_path="C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include"  -IC:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ 
 
 CC = C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include
 ASM = C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include
 AR = C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armar rq
 
-DEL = C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/../bin/rm -f
-CP = C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/../bin/cp -f
+DEL = C:/ti/xdctools_3_32_00_06_core/packages/../bin/rm -f
+CP = C:/ti/xdctools_3_32_00_06_core/packages/../bin/cp -f
 
 define RM
 	$(if $(wildcard $1),$(DEL) $1,:)

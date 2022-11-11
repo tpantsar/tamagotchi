@@ -103,13 +103,17 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
 void sensorTaskFxn(UArg arg0, UArg arg1)
 {
+    char debug_msg[50];
+
+    // RTOS:n i2c-muuttujat ja alustus
     I2C_Handle i2c;
     I2C_Params i2cParams;
-    I2C_Params_init(&i2cParams);
+    // Muuttuja i2c-viestirakenteelle
     I2C_Transaction i2cMessage;
-    i2cParams.bitRate = I2C_400kHz;
 
-    char debug_msg[50];
+    // Alustetaan i2c-väylä
+    I2C_Params_init(&i2cParams);
+    i2cParams.bitRate = I2C_400kHz;
 
     // JTKJ: Tehtava 2. Avaa i2c-vayla taskin kayttoon
     // JTKJ: Exercise 2. Open the i2c bus
@@ -126,21 +130,20 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     Task_sleep(100000 / Clock_tickPeriod);
     opt3001_setup(&i2c);
 
+    // https://lovelace.oulu.fi/tietokonej%C3%A4rjestelm%C3%A4t/tietokonej%C3%A4rjestelm%C3%A4t-syksy-2022/sarjaliikenne/#i2c-v%C3%A4yl%C3%A4
     while (1)
     {
+        /*
         sprintf(debug_msg, "%d\n", programState);
         System_printf(debug_msg);
         System_flush();
-
-        // if (I2C_transfer(i2c, &i2cMessage))
-        // if (programState == DATA_READ)
+        */
 
         // JTKJ: Tehtava 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
         // JTKJ: Exercise 2. Read sensor data and print it to the Debug window as string
         ambientLight = opt3001_get_data(&i2c);
 
         // Valoisuusarvo tiedoksi konsoli-ikkunaan
-        I2C_close(i2c); // Suljetaan i2c-vayla
         sprintf(debug_msg, "%f\n", ambientLight);
         System_printf(debug_msg);
         System_flush();
@@ -154,9 +157,10 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         System_printf("sensorTask\n");
         System_flush();
 
-        // Once per second, you can modify this
+        // Taski nukkumaan!
         Task_sleep(1000000 / Clock_tickPeriod);
     }
+    I2C_close(i2c); // Suljetaan i2c-vayla
 }
 
 int main(void)

@@ -63,7 +63,7 @@ wireless/CWC_CC2650_154Drv.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/c
 wireless/CWC_CC2650_154Drv.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_data_entry.h
 wireless/CWC_CC2650_154Drv.obj: ../wireless/ieee_cmd.h
 wireless/CWC_CC2650_154Drv.obj: ../wireless/CWC_CC2650_154Drv.h
-wireless/CWC_CC2650_154Drv.obj: C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/xdc/std.h
+wireless/CWC_CC2650_154Drv.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/std.h
 wireless/CWC_CC2650_154Drv.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdarg.h
 wireless/CWC_CC2650_154Drv.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stddef.h
 wireless/CWC_CC2650_154Drv.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/targets/arm/elf/std.h
@@ -196,7 +196,7 @@ C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverli
 
 ../wireless/CWC_CC2650_154Drv.h:
 
-C:/Users/tomi_/Downloads/xdctools_3_32_01_22_core_win32/xdctools_3_32_01_22_core/packages/xdc/std.h:
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/std.h:
 
 C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdarg.h:
 

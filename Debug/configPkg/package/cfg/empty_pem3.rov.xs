@@ -10945,7 +10945,7 @@ __o = __obj[988]
     __o['cfgArgs'] = null
     __o['cfgArgsEncoded'] = true
     __o['cfgHome'] = String(java.net.URLDecoder.decode('configPkg', 'UTF-8'))
-    __o['cfgScript'] = String(java.net.URLDecoder.decode('C%3A%2FUsers%2Ftomi_%2Fworkspace_v10%2Fempty_CC2650STK_TI%2Fempty.cfg', 'UTF-8'))
+    __o['cfgScript'] = String(java.net.URLDecoder.decode('C%3A%2FUsers%2Ftomi_%2FDesktop%2Fworkspace_v10%2Fempty_CC2650STK_TI%2Fempty.cfg', 'UTF-8'))
     __o['prelink'] = false
     __o['profile'] = String(java.net.URLDecoder.decode('release', 'UTF-8'))
     __o['releases'] = __obj[989.0]
@@ -11056,7 +11056,7 @@ __o = __obj[1001]  // ti.targets.arm.elf.M3/ccConfigOpts
 __o = __obj[1002]  // ti.targets.arm.elf.M3/ccOpts
     __o['$category'] = String(java.net.URLDecoder.decode('Struct', 'UTF-8'))
     __o['$name'] = String(java.net.URLDecoder.decode('ti.targets.arm.elf.M3%2FccOpts', 'UTF-8'))
-    __o['prefix'] = String(java.net.URLDecoder.decode('-mv7M3+--code_state%3D16+--float_support%3Dnone+-me+--include_path%3D%22C%3A%2FUsers%2Ftomi_%2Fworkspace_v10%2Fempty_CC2650STK_TI%22+--include_path%3D%22C%3A%2FUsers%2Ftomi_%2Fworkspace_v10%2Fempty_CC2650STK_TI%22+--include_path%3D%22C%3A%2Fti%2Ftirtos_cc13xx_cc26xx_2_21_00_06%2Fproducts%2Fcc26xxware_2_24_03_17272%22+--include_path%3D%22C%3A%2Fti%2Fccs1040%2Fccs%2Ftools%2Fcompiler%2Fti-cgt-arm_20.2.5.LTS%2Finclude%22+--define%3Dccs+-g+--diag_warning%3D225+--diag_warning%3D255+--diag_wrap%3Doff+--display_error_number+--gen_func_subsections%3Don+--abi%3Deabi+++-qq+-pdsw225', 'UTF-8'))
+    __o['prefix'] = String(java.net.URLDecoder.decode('-mv7M3+--code_state%3D16+--float_support%3Dnone+-me+--include_path%3D%22C%3A%2FUsers%2Ftomi_%2FDesktop%2Fworkspace_v10%2Fempty_CC2650STK_TI%22+--include_path%3D%22C%3A%2FUsers%2Ftomi_%2FDesktop%2Fworkspace_v10%2Fempty_CC2650STK_TI%22+--include_path%3D%22C%3A%2Fti%2Ftirtos_cc13xx_cc26xx_2_21_00_06%2Fproducts%2Fcc26xxware_2_24_03_17272%22+--include_path%3D%22C%3A%2Fti%2Fccs1040%2Fccs%2Ftools%2Fcompiler%2Fti-cgt-arm_20.2.5.LTS%2Finclude%22+--define%3Dccs+-g+--diag_warning%3D225+--diag_warning%3D255+--diag_wrap%3Doff+--display_error_number+--gen_func_subsections%3Don+--abi%3Deabi+++-qq+-pdsw225', 'UTF-8'))
     __o['suffix'] = String(java.net.URLDecoder.decode('', 'UTF-8'))
 
 __o = __obj[1003]  // ti.targets.arm.elf.M3/compatibleSuffixes
