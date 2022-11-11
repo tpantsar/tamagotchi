@@ -1,0 +1,24 @@
+
+**** Build of configuration Debug for project empty_CC2650STK_TI ****
+
+"C:\\ti\\ccs1040\\ccs\\utils\\bin\\gmake" -k -j 8 all -O 
+ 
+making ../src/sysbios/rom_sysbios.aem3 ...
+gmake[1]: Nothing to be done for 'all'.
+Building file: "../sensors/opt3001.c"
+Invoking: Arm Compiler
+"C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=none -me --include_path="C:/Users/tomi_/workspace_v10/empty_CC2650STK_TI" --include_path="C:/Users/tomi_/workspace_v10/empty_CC2650STK_TI" --include_path="C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272" --include_path="C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include" --define=ccs -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi --preproc_with_compile --preproc_dependency="sensors/opt3001.d_raw" --obj_directory="sensors" --cmd_file="configPkg/compiler.opt"  "../sensors/opt3001.c"
+ 
+>> Compilation failure
+sensors/subdir_rules.mk:9: recipe for target 'sensors/opt3001.obj' failed
+"../sensors/opt3001.c", line 80: error #31: expression must have integral type
+"../sensors/opt3001.c", line 81: error #31: expression must have integral type
+"../sensors/opt3001.c", line 75: warning #179-D: variable "maskiE" was declared but never referenced
+"../sensors/opt3001.c", line 75: warning #179-D: variable "maskiR" was declared but never referenced
+"../sensors/opt3001.c", line 84: warning #179-D: variable "txBuffer" was declared but never referenced
+"../sensors/opt3001.c", line 85: warning #179-D: variable "rxBuffer" was declared but never referenced
+2 errors detected in the compilation of "../sensors/opt3001.c".
+gmake: *** [sensors/opt3001.obj] Error 1
+gmake: Target 'all' not remade because of errors.
+
+**** Build Finished ****

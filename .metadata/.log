@@ -1,0 +1,417 @@
+!SESSION 2022-11-10 16:41:43.555 -----------------------------------------------
+eclipse.buildId=4.14.0.I20191210-0610
+java.version=1.8.0_144
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fi_FI
+Framework arguments:  -product com.ti.ccstudio.branding.product -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product com.ti.ccstudio.branding.product -data C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI -product com.ti.ccstudio.branding.product
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:41:47.421
+!MESSAGE path=ccs_base/DebugServer
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:41:47.421
+!MESSAGE debugServerDir=C:/ti/ccs1040/ccs/ccs_base/DebugServer
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.673
+!MESSAGE constructor
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.673
+!MESSAGE done with directories
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.673
+!MESSAGE loading ti_logger
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.681
+!MESSAGE Platform os: win32
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.681
+!MESSAGE loading cToolsIF
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.683
+!MESSAGE loading cTools
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.691
+!MESSAGE loading TraceFactory
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.693
+!MESSAGE loading sqlite3
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.693
+!MESSAGE loading CloudTrace
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:41:49.713
+!MESSAGE CloudTrace interface loaded
+
+!ENTRY org.eclipse.equinox.event 4 0 2022-11-10 16:41:51.542
+!MESSAGE Exception while dispatching event org.osgi.service.event.Event [topic=org/eclipse/e4/ui/model/application/ApplicationElement/tags/ADD] {ChangedElement=org.eclipse.e4.primaryDataStack=org.eclipse.e4.ui.model.application.ui.basic.impl.PartStackImpl@16c9f7f0 (tags: [org.eclipse.e4.primaryDataStack, EditorStack, active, Maximized], contributorURI: null) (widget: CTabFolder {}, renderer: org.eclipse.e4.ui.workbench.renderers.swt.StackRenderer@42ac309, toBeRendered: true, onTop: false, visible: true, containerData: null, accessibilityPhrase: null), org.eclipse.e4.data={ChangedElement=org.eclipse.e4.primaryDataStack=org.eclipse.e4.ui.model.application.ui.basic.impl.PartStackImpl@16c9f7f0 (tags: [org.eclipse.e4.primaryDataStack, EditorStack, active, Maximized], contributorURI: null) (widget: CTabFolder {}, renderer: org.eclipse.e4.ui.workbench.renderers.swt.StackRenderer@42ac309, toBeRendered: true, onTop: false, visible: true, containerData: null, accessibilityPhrase: null), AttName=tags, EventType=ADD, Position=3, Widget=CTabFolder {}, NewValue=Maximized}, AttName=tags, EventType=ADD, Position=3, Widget=CTabFolder {}, NewValue=Maximized} to handler org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler@25c756f0
+!STACK 0
+org.eclipse.e4.core.di.InjectionException: java.lang.IllegalArgumentException: 
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:68)
+	at org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler.lambda$0(UIEventObjectSupplier.java:64)
+	at org.eclipse.swt.widgets.Synchronizer.syncExec(Synchronizer.java:236)
+	at org.eclipse.ui.internal.UISynchronizer.syncExec(UISynchronizer.java:146)
+	at org.eclipse.swt.widgets.Display.syncExec(Display.java:4629)
+	at org.eclipse.e4.ui.internal.workbench.swt.E4Application$1.syncExec(E4Application.java:219)
+	at org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler.handleEvent(UIEventObjectSupplier.java:64)
+	at org.eclipse.equinox.internal.event.EventHandlerWrapper.handleEvent(EventHandlerWrapper.java:205)
+	at org.eclipse.equinox.internal.event.EventHandlerTracker.dispatchEvent(EventHandlerTracker.java:203)
+	at org.eclipse.equinox.internal.event.EventHandlerTracker.dispatchEvent(EventHandlerTracker.java:1)
+	at org.eclipse.osgi.framework.eventmgr.EventManager.dispatchEvent(EventManager.java:234)
+	at org.eclipse.osgi.framework.eventmgr.ListenerQueue.dispatchEventSynchronous(ListenerQueue.java:151)
+	at org.eclipse.equinox.internal.event.EventAdminImpl.dispatchEvent(EventAdminImpl.java:132)
+	at org.eclipse.equinox.internal.event.EventAdminImpl.sendEvent(EventAdminImpl.java:75)
+	at org.eclipse.equinox.internal.event.EventComponent.sendEvent(EventComponent.java:44)
+	at org.eclipse.e4.ui.services.internal.events.EventBroker.send(EventBroker.java:55)
+	at org.eclipse.e4.ui.internal.workbench.UIEventPublisher.notifyChanged(UIEventPublisher.java:63)
+	at org.eclipse.emf.common.notify.impl.BasicNotifierImpl.eNotify(BasicNotifierImpl.java:424)
+	at org.eclipse.emf.ecore.util.EcoreEList.dispatchNotification(EcoreEList.java:249)
+	at org.eclipse.emf.common.notify.impl.NotifyingListImpl.addUnique(NotifyingListImpl.java:304)
+	at org.eclipse.emf.common.util.AbstractEList.add(AbstractEList.java:304)
+	at org.eclipse.ui.internal.WorkbenchIntroManager.setIntroStandby(WorkbenchIntroManager.java:200)
+	at org.eclipse.ui.internal.WorkbenchIntroManager.showIntro(WorkbenchIntroManager.java:139)
+	at org.eclipse.ui.application.WorkbenchWindowAdvisor.openIntro(WorkbenchWindowAdvisor.java:188)
+	at org.eclipse.ui.internal.ide.application.IDEWorkbenchWindowAdvisor.openIntro(IDEWorkbenchWindowAdvisor.java:572)
+	at org.eclipse.ui.internal.WorkbenchWindow.setup(WorkbenchWindow.java:963)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:58)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.processAnnotated(InjectorImpl.java:1002)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.internalInject(InjectorImpl.java:139)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.inject(InjectorImpl.java:95)
+	at org.eclipse.e4.core.contexts.ContextInjectionFactory.inject(ContextInjectionFactory.java:83)
+	at org.eclipse.ui.internal.Workbench.createWorkbenchWindow(Workbench.java:1505)
+	at org.eclipse.ui.internal.StandardTrim.createStatusLine(StandardTrim.java:119)
+	at org.eclipse.ui.internal.StandardTrim.createWidget(StandardTrim.java:48)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:58)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.processAnnotated(InjectorImpl.java:1002)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.internalInject(InjectorImpl.java:139)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.internalMake(InjectorImpl.java:408)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.make(InjectorImpl.java:345)
+	at org.eclipse.e4.core.contexts.ContextInjectionFactory.make(ContextInjectionFactory.java:227)
+	at org.eclipse.e4.ui.internal.workbench.ReflectionContributionFactory.createFromBundle(ReflectionContributionFactory.java:94)
+	at org.eclipse.e4.ui.internal.workbench.ReflectionContributionFactory.doCreate(ReflectionContributionFactory.java:60)
+	at org.eclipse.e4.ui.internal.workbench.ReflectionContributionFactory.create(ReflectionContributionFactory.java:37)
+	at org.eclipse.e4.ui.workbench.renderers.swt.ToolControlRenderer.createWidget(ToolControlRenderer.java:129)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.createWidget(PartRenderingEngine.java:1002)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.safeCreateGui(PartRenderingEngine.java:662)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.safeCreateGui(PartRenderingEngine.java:768)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.access$0(PartRenderingEngine.java:739)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$2.run(PartRenderingEngine.java:733)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:45)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.createGui(PartRenderingEngine.java:717)
+	at org.eclipse.e4.ui.workbench.renderers.swt.SWTPartRenderer.processContents(SWTPartRenderer.java:72)
+	at org.eclipse.e4.ui.workbench.renderers.swt.TrimBarRenderer.processContents(TrimBarRenderer.java:134)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.safeCreateGui(PartRenderingEngine.java:676)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$1.run(PartRenderingEngine.java:547)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:45)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.createGui(PartRenderingEngine.java:531)
+	at org.eclipse.e4.ui.workbench.renderers.swt.WBWRenderer.processContents(WBWRenderer.java:687)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.safeCreateGui(PartRenderingEngine.java:676)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.safeCreateGui(PartRenderingEngine.java:768)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.access$0(PartRenderingEngine.java:739)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$2.run(PartRenderingEngine.java:733)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:45)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.createGui(PartRenderingEngine.java:717)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$5.run(PartRenderingEngine.java:1086)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:338)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1049)
+	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:155)
+	at org.eclipse.ui.internal.Workbench.lambda$3(Workbench.java:660)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:338)
+	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:559)
+	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:154)
+	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:150)
+	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:203)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:137)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:107)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:401)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:255)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:657)
+	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:594)
+	at org.eclipse.equinox.launcher.Main.run(Main.java:1465)
+Caused by: java.lang.IllegalArgumentException: 
+	at org.eclipse.core.runtime.Assert.isLegal(Assert.java:66)
+	at org.eclipse.core.runtime.Assert.isLegal(Assert.java:50)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElementsRecursive(ModelServiceImpl.java:176)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElements(ModelServiceImpl.java:438)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElements(ModelServiceImpl.java:431)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.findValidElementsToMinimize(MinMaxAddon.java:824)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.getElementsToMinimize(MinMaxAddon.java:767)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.maximize(MinMaxAddon.java:696)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.subscribeTopicTagsChanged(MinMaxAddon.java:387)
+	at sun.reflect.GeneratedMethodAccessor10.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:58)
+	... 92 more
+
+!ENTRY com.ti.ccstudio.project.ui.webcontent 1 0 2022-11-10 16:41:51.820
+!MESSAGE CCS HTTP adapter started! [ccs.port:55842] - Open 'http://localhost:55842/ide' in web browser to see listing of available APIs...
+
+!ENTRY com.ti.ccstudio.ui 1 0 2022-11-10 16:41:56.000
+!MESSAGE CCS IDE session started!
+	CCS build: 10.4.0.00006
+	CCS location: C:/ti/ccs1040/ccs
+	Workspace location: C:/Users/tomi_/OneDrive/Kurssit/(8 op) Tietokonejärjestelmät/empty_CC2650STK_TI
+
+!ENTRY com.ti.common.project.core 4 0 2022-11-10 16:43:19.760
+!MESSAGE Invalid project description.
+!STACK 1
+org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.core.internal.resources.Project.checkDescription(Project.java:173)
+	at org.eclipse.core.internal.resources.Project.assertCreateRequirements(Project.java:57)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:266)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:252)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.internalImportProject(ProjectImporter.java:478)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.access$0(ProjectImporter.java:425)
+	at com.ti.ccstudio.project.core.services.ProjectImporter$1.run(ProjectImporter.java:387)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.importProject(ProjectImporter.java:385)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.createExistingProject(ProjectImportPage.java:1425)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.access$27(ProjectImportPage.java:1263)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage$16.execute(ProjectImportPage.java:1213)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.lambda$0(WorkspaceModifyOperation.java:110)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.run(WorkspaceModifyOperation.java:131)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+Contains: OK
+Contains: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2022-11-10 16:43:19.760
+!MESSAGE Invalid project description.
+!SUBENTRY 2 unknown 0 0 2022-11-10 16:43:19.760
+!MESSAGE OK
+!SUBENTRY 2 org.eclipse.core.resources 4 77 2022-11-10 16:43:19.760
+!MESSAGE C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+
+!ENTRY com.ti.common.project.core 4 0 2022-11-10 16:43:41.339
+!MESSAGE Invalid project description.
+!STACK 1
+org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.core.internal.resources.Project.checkDescription(Project.java:173)
+	at org.eclipse.core.internal.resources.Project.assertCreateRequirements(Project.java:57)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:266)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:252)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.internalImportProject(ProjectImporter.java:478)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.access$0(ProjectImporter.java:425)
+	at com.ti.ccstudio.project.core.services.ProjectImporter$1.run(ProjectImporter.java:387)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.importProject(ProjectImporter.java:385)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.createExistingProject(ProjectImportPage.java:1425)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.access$27(ProjectImportPage.java:1263)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage$16.execute(ProjectImportPage.java:1213)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.lambda$0(WorkspaceModifyOperation.java:110)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.run(WorkspaceModifyOperation.java:131)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+Contains: OK
+Contains: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2022-11-10 16:43:41.347
+!MESSAGE Invalid project description.
+!SUBENTRY 2 unknown 0 0 2022-11-10 16:43:41.347
+!MESSAGE OK
+!SUBENTRY 2 org.eclipse.core.resources 4 77 2022-11-10 16:43:41.347
+!MESSAGE C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+
+!ENTRY org.eclipse.e4.ui.workbench 1 0 2022-11-10 16:44:11.703
+!MESSAGE REX Setting browser URL to: http://dev.ti.com/tirex4-desktop/wizard
+
+!ENTRY com.ti.common.project.core 4 0 2022-11-10 16:44:57.822
+!MESSAGE Invalid project description.
+!STACK 1
+org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.core.internal.resources.Project.checkDescription(Project.java:173)
+	at org.eclipse.core.internal.resources.Project.assertCreateRequirements(Project.java:57)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:266)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:252)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.internalImportProject(ProjectImporter.java:478)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.access$0(ProjectImporter.java:425)
+	at com.ti.ccstudio.project.core.services.ProjectImporter$1.run(ProjectImporter.java:387)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at com.ti.ccstudio.project.core.services.ProjectImporter.importProject(ProjectImporter.java:385)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.createExistingProject(ProjectImportPage.java:1425)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage.access$27(ProjectImportPage.java:1263)
+	at com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage$16.execute(ProjectImportPage.java:1213)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.lambda$0(WorkspaceModifyOperation.java:110)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2317)
+	at org.eclipse.ui.actions.WorkspaceModifyOperation.run(WorkspaceModifyOperation.java:131)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+Contains: OK
+Contains: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+!SUBENTRY 1 org.eclipse.core.resources 4 77 2022-11-10 16:44:57.822
+!MESSAGE Invalid project description.
+!SUBENTRY 2 unknown 0 0 2022-11-10 16:44:57.822
+!MESSAGE OK
+!SUBENTRY 2 org.eclipse.core.resources 4 77 2022-11-10 16:44:57.822
+!MESSAGE C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI overlaps the workspace location: C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI
+!SESSION 2022-11-10 16:47:39.825 -----------------------------------------------
+eclipse.buildId=4.14.0.I20191210-0610
+java.version=1.8.0_144
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fi_FI
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product com.ti.ccstudio.branding.product
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:47:41.324
+!MESSAGE path=ccs_base/DebugServer
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:47:41.324
+!MESSAGE debugServerDir=C:/ti/ccs1040/ccs/ccs_base/DebugServer
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:45.993
+!MESSAGE constructor
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:45.996
+!MESSAGE done with directories
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:45.996
+!MESSAGE loading ti_logger
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:45.996
+!MESSAGE Platform os: win32
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:45.996
+!MESSAGE loading cToolsIF
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:46.004
+!MESSAGE loading cTools
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:46.006
+!MESSAGE loading TraceFactory
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:46.016
+!MESSAGE loading sqlite3
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:46.016
+!MESSAGE loading CloudTrace
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:47:46.037
+!MESSAGE CloudTrace interface loaded
+
+!ENTRY com.ti.ccstudio.project.ui.webcontent 1 0 2022-11-10 16:47:48.456
+!MESSAGE CCS HTTP adapter started! [ccs.port:49234] - Open 'http://localhost:49234/ide' in web browser to see listing of available APIs...
+
+!ENTRY com.ti.ccstudio.ui 1 0 2022-11-10 16:47:52.079
+!MESSAGE CCS IDE session started!
+	CCS build: 10.4.0.00006
+	CCS location: C:/ti/ccs1040/ccs
+	Workspace location: C:/Users/tomi_/OneDrive/Kurssit/(8 op) Tietokonejärjestelmät/empty_CC2650STK_TI
+
+!ENTRY org.eclipse.cdt.core 1 0 2022-11-10 16:48:31.918
+!MESSAGE Indexed 'empty_CC2650STK_TI' (14 sources, 343 headers) in 4,46 sec: 24 944 declarations; 40 268 references; 1 unresolved inclusions; 11 syntax errors; 1 948 unresolved names (2,9 %)
+!SESSION 2022-11-10 16:48:56.726 -----------------------------------------------
+eclipse.buildId=4.14.0.I20191210-0610
+java.version=1.8.0_144
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fi_FI
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product com.ti.ccstudio.branding.product
+
+!ENTRY org.eclipse.core.resources 2 10035 2022-11-10 16:48:58.181
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:48:58.278
+!MESSAGE path=ccs_base/DebugServer
+
+!ENTRY com.ti.common.core 1 0 2022-11-10 16:48:58.280
+!MESSAGE debugServerDir=C:/ti/ccs1040/ccs/ccs_base/DebugServer
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.561
+!MESSAGE constructor
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.561
+!MESSAGE done with directories
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.561
+!MESSAGE loading ti_logger
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.561
+!MESSAGE Platform os: win32
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.561
+!MESSAGE loading cToolsIF
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.572
+!MESSAGE loading cTools
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.572
+!MESSAGE loading TraceFactory
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.580
+!MESSAGE loading sqlite3
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.581
+!MESSAGE loading CloudTrace
+
+!ENTRY com.ti.dbgtrc.webapp.CloudTraceInterface 0 0 2022-11-10 16:49:02.600
+!MESSAGE CloudTrace interface loaded
+
+!ENTRY com.ti.ccstudio.project.ui.webcontent 1 0 2022-11-10 16:49:04.374
+!MESSAGE CCS HTTP adapter started! [ccs.port:49291] - Open 'http://localhost:49291/ide' in web browser to see listing of available APIs...
+
+!ENTRY com.ti.ccstudio.ui 1 0 2022-11-10 16:49:06.765
+!MESSAGE CCS IDE session started!
+	CCS build: 10.4.0.00006
+	CCS location: C:/ti/ccs1040/ccs
+	Workspace location: C:/Users/tomi_/OneDrive/Kurssit/(8 op) Tietokonejärjestelmät/empty_CC2650STK_TI
+
+!ENTRY com.ti.ccstudio.debug.server 4 214294189 2022-11-10 16:49:07.005
+!MESSAGE Unexpected CCS exit detected [10.11.2022 16:47]!!!
+
+!ENTRY org.eclipse.ui 2 2 2022-11-10 16:49:44.016
+!MESSAGE com.ti.ccstudio.system.setup.ui.views.TargetConfigurationView: Deprecated relationship "fast" should be converted to "stack".
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 16:50:31.636
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:10:56.637
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:13:08.862
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:14:43.672
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:16:43.286
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:19:05.442
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:19:25.603
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 17:43:23.741
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 18:00:52.696
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
+
+!ENTRY com.ti.ccstudio.debug 1 0 2022-11-10 18:01:40.764
+!MESSAGE DS_ERROR: Cortex_M3_0: GEL: Encountered a problem loading file: C:\Users\tomi_\workspace_v10\empty_CC2650STK_TI\Debug\empty_CC2650STK_TI.out Could not open file
+
