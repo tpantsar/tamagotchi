@@ -20,11 +20,11 @@
 6. Lisäominaisuudet.
 
 
-Käyttöliittymä
+* Käyttöliittymä
     - Painonapit
     - Ledit
     - Äänimerkit
-Testidatan kerääminen
+* Testidatan kerääminen
     - Datankeräystaski (MPU9250-anturi)
         - Kiihtyvyys (acceleration)
         - Asentomuutos (gyroscope)
@@ -33,7 +33,7 @@ Testidatan kerääminen
         - matplotlib
         - gnuplot
         - Microsoft Excel
-Ohjauskomennot
+* Ohjauskomennot
     - Komennon tulkitseminen
         - Voimakkuus
         - Kesto
@@ -44,13 +44,13 @@ Ohjauskomennot
         - Laitteen liikuttelu ilman tukea "3D:nä" ilmassa.
     - Kiihtyvyysanturi (MPU9250)
     - Asentoanturi (MPU9250)
-Viestintä
+* Viestintä
     - IoT-taustajärjestelmä
     - Komennon tunnistaminen
         - Viesti taustajärjestelmälle merkiksi
         - Äänimerkki tai ledi
     - Viestit taustajärjestelmältä
         - Viesteihin reagoiminen
-Toteutus
+* Toteutus
     - SensorTagin RTOS
     - Tilakone

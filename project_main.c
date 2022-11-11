@@ -35,9 +35,16 @@ Char uartTaskStack[STACKSIZE];
 enum state
 {
     WAITING = 1,
-    DATA_READY
+    DATA_READY,
+    READ_SENSOR = 1,
+    UPDATE,
+    NEW_MSG
 };
+// Globaali tilamuuttuja, alustetaan odotustilaan
 enum state programState = WAITING;
+
+// Merkkijonomuuttujat tulostuksille
+char debug_msg[50];
 
 // JTKJ: Tehtava 3. Valoisuuden globaali muuttuja
 // JTKJ: Exercise 3. Global variable for ambient light
@@ -88,6 +95,13 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         //       Muista tilamuutos
         // JTKJ: Exercise 3. Print out sensor data as string to debug window if the state is correct
         //       Remember to modify state
+        if (programState == READ_SENSOR)
+        {
+            sprintf(debug_msg, "%f\n", ambientLight);
+            System_printf(debug_msg);
+            System_flush();
+            programState = DATA_READY;
+        }
 
         // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
         // JTKJ: Exercise 4. Send the same sensor data string with UART
@@ -103,8 +117,6 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
 void sensorTaskFxn(UArg arg0, UArg arg1)
 {
-    char debug_msg[50];
-
     // RTOS:n i2c-muuttujat ja alustus
     I2C_Handle i2c;
     I2C_Params i2cParams;
@@ -152,6 +164,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         //       Muista tilamuutos
         // JTKJ: Exercise 3. Save the sensor value into the global variable
         //       Remember to modify state
+
 
         // Just for sanity check for exercise, you can comment this out
         System_printf("sensorTask\n");
