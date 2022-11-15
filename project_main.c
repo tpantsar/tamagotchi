@@ -35,10 +35,7 @@ Char uartTaskStack[STACKSIZE];
 enum state
 {
     WAITING = 1,
-    DATA_READY,
-    READ_SENSOR = 1,
-    UPDATE,
-    NEW_MSG
+    DATA_READY
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
 enum state programState = WAITING;
@@ -87,20 +84,17 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 void uartTaskFxn(UArg arg0, UArg arg1)
 {
     // JTKJ: Tehtava 4. Lisaa UARTin alustus: 9600,8n1
-    // JTKJ: Exercise 4. Setup here UART connection as 9600,8n1
 
     while (1)
     {
         // JTKJ: Tehtava 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
         //       Muista tilamuutos
-        // JTKJ: Exercise 3. Print out sensor data as string to debug window if the state is correct
-        //       Remember to modify state
-        if (programState == READ_SENSOR)
+        if (programState == DATA_READY)
         {
             sprintf(debug_msg, "%f\n", ambientLight);
             System_printf(debug_msg);
             System_flush();
-            programState = DATA_READY;
+            programState = WAITING;
         }
 
         // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
@@ -110,8 +104,8 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         System_printf("uartTask\n");
         System_flush();
 
-        // Once per second, you can modify this
-        Task_sleep(1000000 / Clock_tickPeriod);
+        // Once per 100 ms
+        Task_sleep(100000 / Clock_tickPeriod);
     }
 }
 
@@ -152,19 +146,18 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         */
 
         // JTKJ: Tehtava 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
-        // JTKJ: Exercise 2. Read sensor data and print it to the Debug window as string
         ambientLight = opt3001_get_data(&i2c);
-
-        // Valoisuusarvo tiedoksi konsoli-ikkunaan
-        sprintf(debug_msg, "%f\n", ambientLight);
-        System_printf(debug_msg);
-        System_flush();
 
         // JTKJ: Tehtava 3. Tallenna mittausarvo globaaliin muuttujaan
         //       Muista tilamuutos
-        // JTKJ: Exercise 3. Save the sensor value into the global variable
-        //       Remember to modify state
-
+        if (programState == WAITING)
+        {
+            // Valoisuusarvo tiedoksi konsoli-ikkunaan
+            sprintf(debug_msg, "%f\n", ambientLight);
+            System_printf(debug_msg);
+            System_flush();
+            programState = DATA_READY;
+        }
 
         // Just for sanity check for exercise, you can comment this out
         System_printf("sensorTask\n");
