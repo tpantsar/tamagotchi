@@ -83,7 +83,30 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1)
 {
+    char input;
+    char echo_msg[30];
+
+    // UART-kirjaston asetukset
+    UART_Handle uart;
+    UART_Params uartParams;
+
     // JTKJ: Tehtava 4. Lisaa UARTin alustus: 9600,8n1
+    UART_Params_init(&uartParams);
+    uartParams.writeDataMode = UART_DATA_TEXT;
+    uartParams.readDataMode = UART_DATA_TEXT;
+    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.readMode = UART_MODE_BLOCKING;
+    uartParams.baudRate = 9600;            // nopeus 9600baud
+    uartParams.dataLength = UART_LEN_8;    // 8
+    uartParams.parityType = UART_PAR_NONE; // n
+    uartParams.stopBits = UART_STOP_ONE;   // 1
+
+    // Avataan yhteys laitteen sarjaporttiin vakiossa Board_UART0
+    uart = UART_open(Board_UART0, &uartParams);
+    if (uart == NULL)
+    {
+        System_abort("Error opening the UART");
+    }
 
     while (1)
     {
@@ -98,14 +121,22 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
-        // JTKJ: Exercise 4. Send the same sensor data string with UART
+        // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
+        UART_read(uart, &input, 1);
+
+        // Lähetetään merkkijono takaisin
+        sprintf(echo_msg, "Received: %c\n", input);
+        UART_write(uart, echo_msg, strlen(echo_msg));
+
+        // Nukkumaan sekunniksi
+        Task_sleep(1000000L / Clock_tickPeriod);
 
         // Just for sanity check for exercise, you can comment this out
         System_printf("uartTask\n");
         System_flush();
 
-        // Once per 100 ms
-        Task_sleep(100000 / Clock_tickPeriod);
+        /* Lopuksi sarjaliikenneyhteys pitää sulkea UART_Close-kutsulla,
+        mutta esimerkissä sitä ei ole, koska toimimme ikuisessa silmukassa.*/
     }
 }
 
@@ -187,6 +218,7 @@ int main(void)
 
     // JTKJ: Tehtava 4. Ota UART kayttoon ohjelmassa
     // JTKJ: Exercise 4. Initialize UART
+    Board_initUART();
 
     // JTKJ: Tehtava 1. Ota painonappi ja ledi ohjelman kayttoon
     //       Muista rekisteroida keskeytyksen kasittelija painonapille
