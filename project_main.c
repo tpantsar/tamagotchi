@@ -117,18 +117,21 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
+        
+        /*
         // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
         UART_read(uart, &input, 1);
 
         // Lähetetään merkkijono takaisin
         sprintf(echo_msg, "Received: %c\n", input);
         UART_write(uart, echo_msg, strlen(echo_msg));
-
+        */
+       
         // Kohteliaasti nukkumaan sekunniksi
-        Task_sleep(1000000L / Clock_tickPeriod);
+        Task_sleep(100000L / Clock_tickPeriod);
 
         // Just for sanity check for exercise, you can comment this out
-        System_printf("uartTask\n");
+        // System_printf("uartTask\n");
         System_flush();
 
         /* Lopuksi sarjaliikenneyhteys pitää sulkea UART_Close-kutsulla,
@@ -163,19 +166,21 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     while (1)
     {
         // JTKJ: Tehtava 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
-        ambientLight = opt3001_get_data(&i2c);
+        double lux = opt3001_get_data(&i2c);
+        char lux_str[100];
+        sprintf(lux_str, "sensorTask: %f luksia\n", lux);
+        System_printf(lux_str);
 
         // JTKJ: Tehtava 3. Tallenna mittausarvo globaaliin muuttujaan. Muista tilamuutos
         if (programState == WAITING)
         {
-            sprintf(debug_msg, "sensorTask: %f luksia\n", ambientLight);
-            System_printf(debug_msg);
-            System_flush();
+            ambientLight = lux;
+            // System_flush();
             programState = DATA_READY;
         }
 
         // Just for sanity check for exercise, you can comment this out
-        System_printf("sensorTask\n");
+        // System_printf("sensorTask\n");
         System_flush();
 
         // Taski nukkumaan!
