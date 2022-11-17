@@ -1,6 +1,8 @@
 /* C Standard library */
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <inttypes.h>
 
 /* XDCtools files */
 #include <xdc/std.h>
@@ -19,12 +21,11 @@
 
 /* Board Header files */
 #include "Board.h"
-
-// #include "wireless/comm_lib.h"
+#include "wireless/comm_lib.h"
 #include "sensors/opt3001.h"
-
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
+#include "sensors/buzzer.h"
+#include "sensors/mpu9250.h"
+#include "sensors/tmp007.h"
 
 /* Task */
 #define STACKSIZE 2048
@@ -92,7 +93,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
     uartParams.readDataMode = UART_DATA_TEXT;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.readMode = UART_MODE_BLOCKING;
-    uartParams.baudRate = 9600;            // nopeus 9600baud
+    uartParams.baudRate = 9600;            // nopeus 9600 baud
     uartParams.dataLength = UART_LEN_8;    // 8
     uartParams.parityType = UART_PAR_NONE; // n
     uartParams.stopBits = UART_STOP_ONE;   // 1
@@ -108,6 +109,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
     {
         // JTKJ: Tehtava 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
         //       Muista tilamuutos
+
         if (programState == DATA_READY)
         {
             sprintf(debug_msg, "uartTask: %f luksia\n", ambientLight);
@@ -117,22 +119,21 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
-        
-        /*
+
         // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
-        UART_read(uart, &input, 1);
+        // UART_read(uart, &input, 1);
 
         // Lähetetään merkkijono takaisin
-        sprintf(echo_msg, "Received: %c\n", input);
+        sprintf(echo_msg, "uartTask: %lf luksia\n\r", opt3001_get_data(&i2c));
         UART_write(uart, echo_msg, strlen(echo_msg));
-        */
-       
+
         // Kohteliaasti nukkumaan sekunniksi
-        Task_sleep(100000L / Clock_tickPeriod);
+        Task_sleep(1000000L / Clock_tickPeriod);
 
         // Just for sanity check for exercise, you can comment this out
-        // System_printf("uartTask\n");
-        System_flush();
+        System_printf("uartTask\n");
+
+        / System_flush();
 
         /* Lopuksi sarjaliikenneyhteys pitää sulkea UART_Close-kutsulla,
         mutta esimerkissä sitä ei ole, koska toimimme ikuisessa silmukassa.*/
@@ -151,7 +152,21 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     I2C_Params_init(&i2cParams);
     i2cParams.bitRate = I2C_400kHz;
 
-    // JTKJ: Tehtava 2. Avaa i2c-vayla taskin kayttoon
+    float ax, ay, az, gx, gy, gz;
+
+    I2C_Handle i2cMPU;
+    I2C_Params i2cMPUParams;
+
+    I2C_Params_init(&i2cMPUParams);
+    i2cMPUParams.bitRate = I2C_400kHz;
+
+    i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
+    if (i2cMPU == NULL)
+    {
+        System_abort("Error Initializing I2CMPU\n");
+    }
+
+    // JTKJ: Tehtava 2. Avaa valosensorin i2c-vayla taskin kayttoon
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
     if (i2c == NULL)
     {
@@ -167,9 +182,10 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     {
         // JTKJ: Tehtava 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
         double lux = opt3001_get_data(&i2c);
-        char lux_str[100];
-        sprintf(lux_str, "sensorTask: %f luksia\n", lux);
-        System_printf(lux_str);
+        char lux_str[50];
+        sprintf(lux_str, "sensorTask: %lf luksia\n", lux);
+        System_printf("%s\n", lux_str);
+        System_flush();
 
         // JTKJ: Tehtava 3. Tallenna mittausarvo globaaliin muuttujaan. Muista tilamuutos
         if (programState == WAITING)
@@ -183,7 +199,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         // System_printf("sensorTask\n");
         System_flush();
 
-        // Taski nukkumaan!
+        // Once per second
         Task_sleep(1000000 / Clock_tickPeriod);
     }
     I2C_close(i2c); // Suljetaan i2c-vayla
@@ -196,6 +212,8 @@ int main(void)
     Task_Params sensorTaskParams;
     Task_Handle uartTaskHandle;
     Task_Params uartTaskParams;
+    Task_Handle commTaskHandle;
+    Task_Params commTaskParams;
 
     // Initialize board
     Board_initGeneral();
@@ -246,6 +264,7 @@ int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
+
     if (uartTaskHandle == NULL)
     {
         System_abort("Task create failed!");
