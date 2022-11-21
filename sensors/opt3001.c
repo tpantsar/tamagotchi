@@ -74,11 +74,8 @@ double opt3001_get_data(I2C_Handle *i2c)
 {
 	// JTKJ: Tehtava 2. Muokkaa funktiota niin etta se palauttaa mittausarvon lukseina
 	// JTKJ: Exercise 2. Complete this function to return the measured value as lux
-	uint16_t maskiE, maskiR, bittiE, bittiR, rekisteri;
+	uint16_t bittiE, bittiR, rekisteri;
 	double lux;
-
-	maskiE = 0xF000;
-	maskiR = 0x0FFF;
 
 	// JTKJ: Find out the correct buffer sizes (n) with this sensor?
 	// Ensimmainen tavu rxBuffer[0] on datarekisterin eniten merkitseva tavu (MSB-tavu)
@@ -106,11 +103,9 @@ double opt3001_get_data(I2C_Handle *i2c)
 		{
 			// JTKJ: Here the conversion from register value to lux
 			rekisteri = (rxBuffer[0] << 8) | rxBuffer[1];
-			bittiE = (rekisteri & maskiE) >> 12;
-			bittiR = rekisteri & maskiR;
+			bittiE = (rekisteri & 0xF000) >> 12;
+			bittiR = rekisteri & 0x0FFF;
 			lux = 0.01 * pow(2, bittiE) * bittiR;
-			
-			return lux;
 		}
 		else
 		{

@@ -14,7 +14,7 @@
  <void id="ArrayList0" method="get">
   <object idref="SolutionManager$PersistState0"/>
   <void method="add">
-   <string>C:\Users\tomi_\OneDrive\Kurssit\(8 op) Tietokonejärjestelmät\empty_CC2650STK_TI\dvt\AnalysisSolutionsTemp\AnalysisSolution1668091747574\null</string>
+   <string>C:\Users\tomi_\Desktop\jtkj-harjoitustyo\dvt\AnalysisSolutionsTemp\AnalysisSolution1669053390659\null</string>
   </void>
   <void method="add">
    <string>C:\ti\ccs1040\ccs\ccs_base\dvt_4.1.0.202105121547\CodeGen\solutions\CodeGenCoverage</string>

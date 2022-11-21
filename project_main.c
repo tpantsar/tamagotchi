@@ -45,34 +45,42 @@ char sensorTaskStack[STACKSIZE];
 char uartTaskStack[STACKSIZE];
 char commTaskStack[STACKSIZE];
 
-// JTKJ: Tehtava 3. Tilakoneen esittely
+// Tilakone Tamagotchin toiminnoille (ruokkiminen, leikkiminen, nukkuminen, varoitus, hyytyminen)
 enum state
 {
     WAITING = 1,
-    DATA_READY
+    DATA_READY,
+    TOIMINTO_RUOKI,
+    TOIMINTO_LEIKI,
+    TOIMINTO_NUKU,
+    TOIMINTO_VAROITUS,
+    TOIMINTO_HYYTYMINEN
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
 enum state programState = WAITING;
 
+// Tilakone SensorTagin toiminnoille
+enum stateSensor
+{
+    ODOTUSTILA = 1,
+    STATE_PAIKALLAAN, // liikesensori
+    STATE_LIIKE,      // liikesensori
+    STATE_VALO,       // valosensori
+    STATE_PIMEA,      // valosensori
+};
+// Globaali tilamuuttuja, alustetaan odotustilaan
+enum stateSensor sensorTagState = ODOTUSTILA;
+
 // Merkkijonomuuttujat tulostuksille
 char debug_msg[100];
 
-// JTKJ: Tehtava 3. Valoisuuden globaali muuttuja
+// Globaalit muuttujat Tamagotchin ominaisuuksille
 double ambientLight = -1000.0;
+int ravinto = 5;
+int leikki = 5;
+int energia = 5;
 
-// Pin variables
-static PIN_Handle buttonHandle;
-static PIN_State buttonState;
-static PIN_Handle LED0_Handle;
-static PIN_State LED0_State;
-static PIN_Handle LED1_Handle;
-static PIN_State LED1_State;
-static PIN_Handle MpuPinHandle;
-static PIN_State MpuPinState;
-static PIN_Handle buzzerHandle;
-static PIN_State buzzerState;
-
-/* PINNIEN ALUSTUKSET */
+/* PINNIEN ALUSTUKSET JA MUUTTUJAT */
 
 // MPU power pin
 static PIN_Config MpuPinConfig[] = {
@@ -80,31 +88,45 @@ static PIN_Config MpuPinConfig[] = {
     PIN_TERMINATE};
 
 // MPU uses its own I2C interface
-static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
+static const I2CCC26XX_I2CPinCfg i2cMPUConfig = {
     .pinSDA = Board_I2C0_SDA1,
     .pinSCL = Board_I2C0_SCL1};
 
-// Vakio BOARD_BUTTON_0 vastaa toista painonappia
+static PIN_Handle MpuPinHandle;
+static PIN_State MpuPinState;
+
+// Painonappi
 PIN_Config buttonConfig[] = {
     Board_BUTTON0 | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
     PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
 };
 
-// Vakio Board_LED0 vastaa toista lediä
+static PIN_Handle buttonHandle;
+static PIN_State buttonState;
+
+// Vihreä ledi
 PIN_Config LED0_ledConfig[] = {
     Board_LED0 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
     PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
 };
 
-// Vakio Board_LED1 vastaa toista lediä
+// Punainen ledi
 PIN_Config LED1_ledConfig[] = {
     Board_LED1 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
     PIN_TERMINATE};
 
+static PIN_Handle LED0_Handle;
+static PIN_State LED0_State;
+static PIN_Handle LED1_Handle;
+static PIN_State LED1_State;
+
 // Buzzer config
-PIN_Config cBuzzer[] = {
+PIN_Config buzzerConfig[] = {
     Board_BUZZER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
     PIN_TERMINATE};
+
+static PIN_Handle buzzerHandle;
+static PIN_State buzzerState;
 
 /* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId)
@@ -117,18 +139,64 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
     PIN_setOutputValue(LED0_Handle, Board_LED0, pinValue);
 }
 
-/* Buzzer function */
-void buzzerFxn(UArg arg0, UArg arg1)
+// Musiikki nukkumiselle
+void buzzerSleep(UArg arg0, UArg arg1)
 {
-    while (1)
-    {
-        buzzerOpen(buzzerHandle);
-        buzzerSetFrequency(2000);
-        Task_sleep(50000 / Clock_tickPeriod);
-        buzzerClose();
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(262); // c
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(262); // c
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(262); // c
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(330); // e
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(294); // d
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(294); // d
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(294); // d
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(349); // f
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(330); // e
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(330); // e
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(294); // d
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(294); // d
+    Task_sleep(250000 / Clock_tickPeriod);
+    buzzerSetFrequency(262); // c
+    Task_sleep(500000 / Clock_tickPeriod);
+    buzzerClose();
+}
 
-        Task_sleep(950000 / Clock_tickPeriod);
-    }
+// Musiikki leikille
+void buzzerPlay(UArg arg0, UArg arg1)
+{
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(2000);
+    Task_sleep(50000 / Clock_tickPeriod);
+    buzzerClose();
+}
+
+// Musiikki varoitukselle
+void buzzerWarning(UArg arg0, UArg arg1)
+{
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(2000);
+    Task_sleep(50000 / Clock_tickPeriod);
+    buzzerClose();
+}
+
+// Musiikki hyytymiselle
+void buzzerCongeal(UArg arg0, UArg arg1)
+{
+    buzzerOpen(buzzerHandle);
+    buzzerSetFrequency(2000);
+    Task_sleep(50000 / Clock_tickPeriod);
+    buzzerClose();
 }
 
 /* Task Functions */
@@ -159,30 +227,86 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         System_abort("Error opening the UART");
     }
 
+    // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
+    UART_read(uart, &input, 1);
+
+    // Lähetetään merkkijono takaisin
+    sprintf(echo_msg, "uartTask: %lf luksia\n\r", ambientLight);
+    UART_write(uart, echo_msg, strlen(echo_msg));
+
     while (1)
     {
-        // JTKJ: Tehtava 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
-        //       Muista tilamuutos
+        System_printf("uartTask");
+        System_flush();
 
         if (programState == DATA_READY)
         {
-            sprintf(debug_msg, "uartTask: %lf luksia\n", ambientLight);
-            System_printf(debug_msg);
-            System_flush();
             programState = WAITING;
         }
 
-        // JTKJ: Tehtava 4. Laheta sama merkkijono UARTilla
+        else if (programState == WAITING)
+        {
+            programState = WAITING;
+        }
 
-        // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
-        // UART_read(uart, &input, 1);
+        switch (programState)
+        {
+        case TOIMINTO_RUOKI:
+            sprintf(echo_msg, "%s", "Syodaan!");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
 
-        // Lähetetään merkkijono takaisin
-        sprintf(echo_msg, "uartTask: %lf luksia\n\r", ambientLight);
-        UART_write(uart, echo_msg, strlen(echo_msg));
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+            break;
 
-        // Once per 100ms
-        Task_sleep(100000L / Clock_tickPeriod);
+        case TOIMINTO_LEIKI:
+            sprintf(echo_msg, "%s", "Leikitaan!");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+            break;
+
+        case TOIMINTO_NUKU:
+            sprintf(echo_msg, "%s", "ZzzZzZ...");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+            break;
+
+        case TOIMINTO_VAROITUS:
+            sprintf(echo_msg, "%s", "SOS!");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+            break;
+
+        case TOIMINTO_HYYTYMINEN:
+            sprintf(echo_msg, "%s", "RIP");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+            break;
+
+        default: // esim. WAITING tai DATA_READY
+            break;
+        }
+
+        // Once per second
+        Task_sleep(1000000 / Clock_tickPeriod);
     }
 }
 
@@ -203,7 +327,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     i2cMPUParams.bitRate = I2C_400kHz;
 
     // Note the different configuration below
-    i2cMPUParams.custom = (uintptr_t)&i2cMPUCfg;
+    i2cMPUParams.custom = (uintptr_t)&i2cMPUConfig;
 
     // Kiihtyvyys- ja liikeanturin muuttujat
     float ax, ay, az, gx, gy, gz;
@@ -287,11 +411,20 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
             programState = DATA_READY;
         }
+
+        if (programState == DATA_READY)
+        {
+            printf("KALA2!!\n");
+            sensorTagState = ODOTUSTILA;
+        }
+
         // Once per second
         Task_sleep(1000000L / Clock_tickPeriod);
+        printf("KALA!!\n");
     }
 }
 
+// Langaton viestintä
 void commTask(UArg arg0, UArg arg1)
 {
     char payload[16]; // viestipuskuri
@@ -345,7 +478,7 @@ int main(void)
     }
 
     // Open buzzer pin
-    buzzerHandle = PIN_open(&buzzerState, cBuzzer);
+    buzzerHandle = PIN_open(&buzzerState, buzzerConfig);
     if (buzzerHandle == NULL)
     {
         System_abort("Pin open failed!");
@@ -394,10 +527,10 @@ int main(void)
 
     /* Communication Task */
     Task_Params_init(&commTaskParams);
-    commTaskParams.stackSize = COMMSTACKSIZE;
+    commTaskParams.stackSize = STACKSIZE;
     commTaskParams.stack = &commTaskStack;
     commTaskParams.priority = 1; // Important to set the priority to 1
-    commTask = Task_create(commTaskFxn, &commTaskParams, NULL);
+    commTaskHandle = Task_create(commTask, &commTaskParams, NULL);
     if (commTask == NULL)
     {
         System_abort("Task create failed!");

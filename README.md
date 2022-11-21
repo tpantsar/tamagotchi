@@ -1,3 +1,24 @@
+TODO:
+- Selvitä, voiko painonappia painaa pohjassa ja samaan aikaan käyttää liikesensoria
+- uartTaskin if (programState == ...) lauseet
+- sensorTaskin if (programState == ...) lauseet
+- liikesensorin datan analysointi
+- Musiikkifunktioiden toteutus!
+- commTaskin toimivuus
+
+
+
+programState kaavio: sensorTaskista uartTaskiin !
+
+Data_ready (programState) -> tila_0 (sisainenState)
+tila_0 (sisainenState) -> tila_liikkuu (sisainenState)
+tila_liikkuu (sisainenState) -> liikunta_tila (programState, sensorTask -> UART)
+liikunta_tila (programState, sensorTask -> UART) -> WAITING (programState, UART)
+
+
+
+
+
 **Toteutusjärjestys**
 
 1. Työsuunnitelma
