@@ -13,6 +13,7 @@ CMD_SRCS += \
 
 C_SRCS += \
 ../CC2650STK.c \
+../buzzer.c \
 ../ccfg.c \
 ../project_main.c 
 
@@ -28,6 +29,7 @@ GEN_MISC_DIRS += \
 
 C_DEPS += \
 ./CC2650STK.d \
+./buzzer.d \
 ./ccfg.d \
 ./project_main.d 
 
@@ -36,6 +38,7 @@ GEN_OPTS += \
 
 OBJS += \
 ./CC2650STK.obj \
+./buzzer.obj \
 ./ccfg.obj \
 ./project_main.obj 
 
@@ -44,11 +47,13 @@ GEN_MISC_DIRS__QUOTED += \
 
 OBJS__QUOTED += \
 "CC2650STK.obj" \
+"buzzer.obj" \
 "ccfg.obj" \
 "project_main.obj" 
 
 C_DEPS__QUOTED += \
 "CC2650STK.d" \
+"buzzer.d" \
 "ccfg.d" \
 "project_main.d" 
 
@@ -58,6 +63,7 @@ GEN_FILES__QUOTED += \
 
 C_SRCS__QUOTED += \
 "../CC2650STK.c" \
+"../buzzer.c" \
 "../ccfg.c" \
 "../project_main.c" 
 

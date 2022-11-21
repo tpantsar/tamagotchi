@@ -34,7 +34,8 @@
 #define __BOARD_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include <ti/drivers/Power.h>
@@ -42,46 +43,48 @@ extern "C" {
 #include "CC2650STK.h"
 
 /* These #defines allow us to reuse TI-RTOS across other device families */
-#define     Board_LED1              Board_STK_LED1
-#define     Board_LED2              Board_STK_LED2
-#define     Board_LED0              Board_LED2
+#define Board_LED1 Board_STK_LED1
+#define Board_LED2 Board_STK_LED2
+#define Board_LED0 Board_LED2
 
-#define     Board_BUTTON0           Board_KEY_LEFT
-#define     Board_BUTTON1           Board_KEY_RIGHT
+#define Board_BUTTON0 Board_KEY_LEFT
+#define Board_BUTTON1 Board_KEY_RIGHT
 
-#define     Board_I2C0              Board_I2C
-#define     Board_I2C_TMP           Board_I2C0
-#define     Board_UART0             Board_UART
-#define     Board_AES0              Board_AES
-#define     Board_WATCHDOG0         CC2650STK_WATCHDOG0
+#define Board_I2C0 Board_I2C
+#define Board_I2C_TMP Board_I2C0
+#define Board_UART0 Board_UART
+#define Board_AES0 Board_AES
+#define Board_WATCHDOG0 CC2650STK_WATCHDOG0
 
-#define     Board_initGeneral() { \
-    Power_init(); \
-    if (PIN_init(BoardGpioInitTable) != PIN_SUCCESS) \
-        {System_abort("Error with PIN_init\n"); \
-    } \
-}
+#define Board_initGeneral()                              \
+    {                                                    \
+        Power_init();                                    \
+        if (PIN_init(BoardGpioInitTable) != PIN_SUCCESS) \
+        {                                                \
+            System_abort("Error with PIN_init\n");       \
+        }                                                \
+    }
 
-#define     Board_initGPIO()
-#define     Board_initPWM()         PWM_init()
-#define     Board_initI2C()         I2C_init()
-#define     Board_initSPI()         SPI_init()
-#define     Board_initUART()        UART_init()
-#define     Board_initWatchdog()    Watchdog_init()
-#define     GPIO_toggle(n)
-#define     GPIO_write(n,m)
+#define Board_initGPIO()
+#define Board_initPWM() PWM_init()
+#define Board_initI2C() I2C_init()
+#define Board_initSPI() SPI_init()
+#define Board_initUART() UART_init()
+#define Board_initWatchdog() Watchdog_init()
+#define GPIO_toggle(n)
+#define GPIO_write(n, m)
 
 /* Board specific I2C addresses */
 
 /* Interface #0 */
-#define     Board_HDC1000_ADDR      (0x43)
-#define     Board_TMP007_ADDR       (0x44)
-#define     Board_OPT3001_ADDR      (0x45)
-#define     Board_BMP280_ADDR       (0x77)
+#define Board_HDC1000_ADDR (0x43)
+#define Board_TMP007_ADDR (0x44)
+#define Board_OPT3001_ADDR (0x45)
+#define Board_BMP280_ADDR (0x77)
 
 /* Interface #1 */
-#define     Board_MPU9250_ADDR      (0x68)
-#define     Board_MPU9250_MAG_ADDR  (0x0C)
+#define Board_MPU9250_ADDR (0x68)
+#define Board_MPU9250_MAG_ADDR (0x0C)
 
 #ifdef __cplusplus
 }

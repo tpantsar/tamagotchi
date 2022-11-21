@@ -74,7 +74,7 @@ double opt3001_get_data(I2C_Handle *i2c)
 {
 	// JTKJ: Tehtava 2. Muokkaa funktiota niin etta se palauttaa mittausarvon lukseina
 	// JTKJ: Exercise 2. Complete this function to return the measured value as lux
-	uint16_t maskiE, maskiR, bittiE, bittiR;
+	uint16_t maskiE, maskiR, bittiE, bittiR, rekisteri;
 	double lux;
 
 	maskiE = 0xF000;
@@ -105,9 +105,12 @@ double opt3001_get_data(I2C_Handle *i2c)
 		if (I2C_transfer(*i2c, &i2cMessage))
 		{
 			// JTKJ: Here the conversion from register value to lux
-			bittiE = (rxBuffer[0] & maskiE) >> 12;
-			bittiR = (rxBuffer[1] & maskiR);
+			rekisteri = (rxBuffer[0] << 8) | rxBuffer[1];
+			bittiE = (rekisteri & maskiE) >> 12;
+			bittiR = rekisteri & maskiR;
 			lux = 0.01 * pow(2, bittiE) * bittiR;
+			
+			return lux;
 		}
 		else
 		{

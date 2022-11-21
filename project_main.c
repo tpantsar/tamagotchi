@@ -1,3 +1,8 @@
+/* JTKJ Harjoitustyö 2022
+    Tomi Pantsar
+    Santeri Heikkinen
+*/
+
 /* C Standard library */
 #include <stdio.h>
 #include <string.h>
@@ -15,22 +20,30 @@
 #include <ti/drivers/PIN.h>
 #include <ti/drivers/pin/PINCC26XX.h>
 #include <ti/drivers/I2C.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/drivers/UART.h>
+#include <driverlib/timer.h>
+
+/* TI-RTOS Header files (PWM_Led_example)
+#include <ti/drivers/GPIO.h>
+#include <ti/drivers/PWM.h>
+*/
 
 /* Board Header files */
 #include "Board.h"
 #include "wireless/comm_lib.h"
 #include "sensors/opt3001.h"
-#include "sensors/buzzer.h"
 #include "sensors/mpu9250.h"
 #include "sensors/tmp007.h"
+#include "buzzer.h"
 
 /* Task */
 #define STACKSIZE 2048
-Char sensorTaskStack[STACKSIZE];
-Char uartTaskStack[STACKSIZE];
+char sensorTaskStack[STACKSIZE];
+char uartTaskStack[STACKSIZE];
+char commTaskStack[STACKSIZE];
 
 // JTKJ: Tehtava 3. Tilakoneen esittely
 enum state
@@ -47,13 +60,30 @@ char debug_msg[100];
 // JTKJ: Tehtava 3. Valoisuuden globaali muuttuja
 double ambientLight = -1000.0;
 
-// JTKJ: Tehtava 1. Lisaa painonappien RTOS-muuttujat ja alustus
+// Pin variables
 static PIN_Handle buttonHandle;
 static PIN_State buttonState;
-static PIN_Handle ledHandle;
-static PIN_State ledState;
+static PIN_Handle LED0_Handle;
+static PIN_State LED0_State;
+static PIN_Handle LED1_Handle;
+static PIN_State LED1_State;
+static PIN_Handle MpuPinHandle;
+static PIN_State MpuPinState;
+static PIN_Handle buzzerHandle;
+static PIN_State buzzerState;
 
-// Pinnien alustukset, molemmille pinneille oma konfiguraatio
+/* PINNIEN ALUSTUKSET */
+
+// MPU power pin
+static PIN_Config MpuPinConfig[] = {
+    Board_MPU_POWER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX,
+    PIN_TERMINATE};
+
+// MPU uses its own I2C interface
+static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
+    .pinSDA = Board_I2C0_SDA1,
+    .pinSCL = Board_I2C0_SCL1};
+
 // Vakio BOARD_BUTTON_0 vastaa toista painonappia
 PIN_Config buttonConfig[] = {
     Board_BUTTON0 | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
@@ -61,12 +91,22 @@ PIN_Config buttonConfig[] = {
 };
 
 // Vakio Board_LED0 vastaa toista lediä
-PIN_Config ledConfig[] = {
+PIN_Config LED0_ledConfig[] = {
     Board_LED0 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
     PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
 };
 
-// Napinpainalluksen keskeytyksen käsittelijäfunktio
+// Vakio Board_LED1 vastaa toista lediä
+PIN_Config LED1_ledConfig[] = {
+    Board_LED1 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
+    PIN_TERMINATE};
+
+// Buzzer config
+PIN_Config cBuzzer[] = {
+    Board_BUZZER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
+    PIN_TERMINATE};
+
+/* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 {
     // JTKJ: Tehtava 1. Vilkuta jompaa kumpaa ledia
@@ -74,7 +114,21 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
     // Vaihdetaan led-pinnin tilaa negaatiolla
     uint_t pinValue = PIN_getOutputValue(Board_LED0);
     pinValue = !pinValue;
-    PIN_setOutputValue(ledHandle, Board_LED0, pinValue);
+    PIN_setOutputValue(LED0_Handle, Board_LED0, pinValue);
+}
+
+/* Buzzer function */
+void buzzerFxn(UArg arg0, UArg arg1)
+{
+    while (1)
+    {
+        buzzerOpen(buzzerHandle);
+        buzzerSetFrequency(2000);
+        Task_sleep(50000 / Clock_tickPeriod);
+        buzzerClose();
+
+        Task_sleep(950000 / Clock_tickPeriod);
+    }
 }
 
 /* Task Functions */
@@ -112,7 +166,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
         if (programState == DATA_READY)
         {
-            sprintf(debug_msg, "uartTask: %f luksia\n", ambientLight);
+            sprintf(debug_msg, "uartTask: %lf luksia\n", ambientLight);
             System_printf(debug_msg);
             System_flush();
             programState = WAITING;
@@ -124,19 +178,11 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         // UART_read(uart, &input, 1);
 
         // Lähetetään merkkijono takaisin
-        sprintf(echo_msg, "uartTask: %lf luksia\n\r", opt3001_get_data(&i2c));
+        sprintf(echo_msg, "uartTask: %lf luksia\n\r", ambientLight);
         UART_write(uart, echo_msg, strlen(echo_msg));
 
-        // Kohteliaasti nukkumaan sekunniksi
-        Task_sleep(1000000L / Clock_tickPeriod);
-
-        // Just for sanity check for exercise, you can comment this out
-        System_printf("uartTask\n");
-
-        / System_flush();
-
-        /* Lopuksi sarjaliikenneyhteys pitää sulkea UART_Close-kutsulla,
-        mutta esimerkissä sitä ei ole, koska toimimme ikuisessa silmukassa.*/
+        // Once per 100ms
+        Task_sleep(100000L / Clock_tickPeriod);
     }
 }
 
@@ -145,64 +191,134 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     // RTOS:n i2c-muuttujat ja alustus
     I2C_Handle i2c;
     I2C_Params i2cParams;
-    // Muuttuja i2c-viestirakenteelle
-    I2C_Transaction i2cMessage;
+    I2C_Handle i2cMPU; // Own i2c-interface for MPU9250 sensor
+    I2C_Params i2cMPUParams;
 
     // Alustetaan i2c-väylä
     I2C_Params_init(&i2cParams);
     i2cParams.bitRate = I2C_400kHz;
 
-    float ax, ay, az, gx, gy, gz;
-
-    I2C_Handle i2cMPU;
-    I2C_Params i2cMPUParams;
-
+    // Alustetaan i2cMPU-väylä
     I2C_Params_init(&i2cMPUParams);
     i2cMPUParams.bitRate = I2C_400kHz;
 
+    // Note the different configuration below
+    i2cMPUParams.custom = (uintptr_t)&i2cMPUCfg;
+
+    // Kiihtyvyys- ja liikeanturin muuttujat
+    float ax, ay, az, gx, gy, gz;
+
+    // MPU power on
+    PIN_setOutputValue(MpuPinHandle, Board_MPU_POWER, Board_MPU_POWER_ON);
+
+    // Wait 100ms for the MPU sensor to power up
+    Task_sleep(100000 / Clock_tickPeriod);
+    System_printf("MPU9250: Power ON\n");
+    System_flush();
+
+    // MPU open i2c
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
     if (i2cMPU == NULL)
     {
         System_abort("Error Initializing I2CMPU\n");
     }
 
-    // JTKJ: Tehtava 2. Avaa valosensorin i2c-vayla taskin kayttoon
+    // MPU setup and calibration
+    Task_sleep(100000 / Clock_tickPeriod);
+    mpu9250_setup(&i2cMPU);
+    I2C_close(i2cMPU);
+
+    // OPT3001 and TMP007 open i2c
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
     if (i2c == NULL)
     {
         System_abort("Error Initializing I2C\n");
     }
 
-    // JTKJ: Tehtava 2. Alusta sensori OPT3001 setup-funktiolla.
-    //       Laita ennen funktiokutsua eteen 100ms viive (Task_sleep)
+    // OPT3001 setup and calibration
     Task_sleep(100000 / Clock_tickPeriod);
     opt3001_setup(&i2c);
+    I2C_close(i2c);
 
     while (1)
     {
-        // JTKJ: Tehtava 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
-        double lux = opt3001_get_data(&i2c);
-        char lux_str[50];
-        sprintf(lux_str, "sensorTask: %lf luksia\n", lux);
-        System_printf("%s\n", lux_str);
+        sprintf(debug_msg, "programState: %d\n", programState);
+        System_printf(debug_msg);
         System_flush();
 
-        // JTKJ: Tehtava 3. Tallenna mittausarvo globaaliin muuttujaan. Muista tilamuutos
-        if (programState == WAITING)
+        if (programState == WAITING) // if (programState == DATA_READ)
         {
-            ambientLight = lux;
-            // System_flush();
+            PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 0);
+
+            // OPT3001 open i2c
+            i2c = I2C_open(Board_I2C_TMP, &i2cParams);
+
+            // OPT3001 ask data
+            ambientLight = opt3001_get_data(&i2c);
+
+            // Sleep 100ms
+            Task_sleep(100000 / Clock_tickPeriod);
+
+            // OPT3001 close i2c
+            I2C_close(i2c);
+
+            // MPU open i2c
+            i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
+
+            // MPU ask data
+            mpu9250_get_data(&i2cMPU, &ax, &ay, &az, &gx, &gy, &gz);
+
+            // Sleep 100ms
+            Task_sleep(100000 / Clock_tickPeriod);
+
+            // MPU close i2c
+            I2C_close(i2cMPU);
+
+            // Print OPT3001 values (ambientLight)
+            sprintf(debug_msg, "%.2lf luksia\n", ambientLight);
+            System_printf(debug_msg);
+            System_flush();
+
+            // Print MPU values (motion)
+            sprintf(debug_msg, "%.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n", ax, ay, az, gx, gy, gz);
+            System_printf(debug_msg);
+            System_flush();
+
             programState = DATA_READY;
         }
-
-        // Just for sanity check for exercise, you can comment this out
-        // System_printf("sensorTask\n");
-        System_flush();
-
         // Once per second
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(1000000L / Clock_tickPeriod);
     }
-    I2C_close(i2c); // Suljetaan i2c-vayla
+}
+
+void commTask(UArg arg0, UArg arg1)
+{
+    char payload[16]; // viestipuskuri
+    uint16_t senderAddr;
+
+    // Radio alustetaan vastaanottotilaan
+    int32_t result = StartReceive6LoWPAN();
+    if (result != true)
+    {
+        System_abort("Wireless receive start failed");
+    }
+
+    // Vastaanotetaan viestejä loopissa
+    while (true)
+    {
+        // jos true, viesti odottaa
+        if (GetRXFlag())
+        {
+            // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
+            memset(payload, 0, 16);
+            // Luetaan viesti puskuriin payload
+            Receive6LoWPAN(&senderAddr, payload, 16);
+            // Tulostetaan vastaanotettu viesti konsoli-ikkunaan
+            System_printf(payload);
+            System_flush();
+        }
+    }
 }
 
 int main(void)
@@ -217,16 +333,23 @@ int main(void)
 
     // Initialize board
     Board_initGeneral();
+    Board_initI2C();
+    Board_initUART();
     Init6LoWPAN();
 
-    // JTKJ: Tehtava 2. Ota i2c-vayla kayttoon ohjelmassa
-    Board_initI2C();
+    // Open MPU power pin
+    MpuPinHandle = PIN_open(&MpuPinState, MpuPinConfig);
+    if (MpuPinHandle == NULL)
+    {
+        System_abort("Pin open failed!");
+    }
 
-    // JTKJ: Tehtava 4. Ota UART kayttoon ohjelmassa
-    Board_initUART();
-
-    // JTKJ: Tehtava 1. Ota painonappi ja ledi ohjelman kayttoon
-    //       Muista rekisteroida keskeytyksen kasittelija painonapille
+    // Open buzzer pin
+    buzzerHandle = PIN_open(&buzzerState, cBuzzer);
+    if (buzzerHandle == NULL)
+    {
+        System_abort("Pin open failed!");
+    }
 
     // Painonappi käyttöön ohjelmassa
     buttonHandle = PIN_open(&buttonState, buttonConfig);
@@ -236,8 +359,8 @@ int main(void)
     }
 
     // Ledi käyttöön ohjelmassa
-    ledHandle = PIN_open(&ledState, ledConfig);
-    if (!ledHandle)
+    LED0_Handle = PIN_open(&LED0_State, LED0_ledConfig);
+    if (!LED0_Handle)
     {
         System_abort("Error initializing LED pins\n");
     }
@@ -264,8 +387,18 @@ int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
-
     if (uartTaskHandle == NULL)
+    {
+        System_abort("Task create failed!");
+    }
+
+    /* Communication Task */
+    Task_Params_init(&commTaskParams);
+    commTaskParams.stackSize = COMMSTACKSIZE;
+    commTaskParams.stack = &commTaskStack;
+    commTaskParams.priority = 1; // Important to set the priority to 1
+    commTask = Task_create(commTaskFxn, &commTaskParams, NULL);
+    if (commTask == NULL)
     {
         System_abort("Task create failed!");
     }
