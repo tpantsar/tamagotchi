@@ -46,7 +46,8 @@ double tmp007_get_data(I2C_Handle *i2c)
     if (I2C_transfer(*i2c, &i2cMessage))
     {
         // JTKJ: Here the conversion from register value to temperature
-        temperature = ((rxBuffer[0] + rxBuffer[1]) >> 2) * 0.03125;
+        uint16_t value = rxBuffer[1] + (rxBuffer[0] << 8);
+        temperature = (value >> 2) * 0.03125;
     }
     else
     {

@@ -125,5 +125,6 @@ GEN_OPTS__QUOTED :=
 SUBDIRS := \
 . \
 sensors \
+src/sysbios \
 wireless \
 

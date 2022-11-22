@@ -50,26 +50,26 @@ enum state
 {
     WAITING = 1,
     DATA_READY,
-    TOIMINTO_RUOKI,
-    TOIMINTO_LEIKI,
-    TOIMINTO_NUKU,
+    RUOKINTA_TILA, // ravinto++, leikki--
+    LIIKUNTA_TILA, // leikki++, energia--
+    ENERGIA_TILA,  // energia++, ravinto--
     TOIMINTO_VAROITUS,
-    TOIMINTO_HYYTYMINEN
+    KARKAAMINEN
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
 enum state programState = WAITING;
 
 // Tilakone SensorTagin toiminnoille
-enum stateSensor
+enum tila
 {
-    ODOTUSTILA = 1,
-    STATE_PAIKALLAAN, // liikesensori
-    STATE_LIIKE,      // liikesensori
-    STATE_VALO,       // valosensori
-    STATE_PIMEA,      // valosensori
+    TILA_0 = 1,
+    TILA_PAIKALLAAN, // liikesensori
+    TILA_LIIKKUU,    // liikesensori
+    TILA_VALO,       // valosensori
+    TILA_PIMEA,      // valosensori
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
-enum stateSensor sensorTagState = ODOTUSTILA;
+enum tila sisainenState = TILA_0;
 
 // Merkkijonomuuttujat tulostuksille
 char debug_msg[100];
@@ -79,6 +79,7 @@ double ambientLight = -1000.0;
 int ravinto = 5;
 int leikki = 5;
 int energia = 5;
+int valoisuus = 2;
 
 /* PINNIEN ALUSTUKSET JA MUUTTUJAT */
 
@@ -131,17 +132,18 @@ static PIN_State buzzerState;
 /* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 {
-    // JTKJ: Tehtava 1. Vilkuta jompaa kumpaa ledia
-
-    // Vaihdetaan led-pinnin tilaa negaatiolla
-    uint_t pinValue = PIN_getOutputValue(Board_LED0);
-    pinValue = !pinValue;
-    PIN_setOutputValue(LED0_Handle, Board_LED0, pinValue);
+    if (ravinto < 10)
+    {
+        ravinto++;
+        leikki--;
+    }
+    programState = RUOKINTA_TILA;
 }
 
 // Musiikki nukkumiselle
-void buzzerSleep(UArg arg0, UArg arg1)
+void buzzerSleep(void)
 {
+    /*
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(262); // c
     Task_sleep(250000 / Clock_tickPeriod);
@@ -170,33 +172,40 @@ void buzzerSleep(UArg arg0, UArg arg1)
     buzzerSetFrequency(262); // c
     Task_sleep(500000 / Clock_tickPeriod);
     buzzerClose();
+    */
 }
 
 // Musiikki leikille
-void buzzerPlay(UArg arg0, UArg arg1)
+void buzzerPlay(void)
 {
+    /*
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(2000);
     Task_sleep(50000 / Clock_tickPeriod);
     buzzerClose();
+    */
 }
 
 // Musiikki varoitukselle
-void buzzerWarning(UArg arg0, UArg arg1)
+void buzzerWarning(void)
 {
+    /*
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(2000);
     Task_sleep(50000 / Clock_tickPeriod);
     buzzerClose();
+    */
 }
 
 // Musiikki hyytymiselle
-void buzzerCongeal(UArg arg0, UArg arg1)
+void buzzerGameOver(void)
 {
+    /*
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(2000);
     Task_sleep(50000 / Clock_tickPeriod);
     buzzerClose();
+    */
 }
 
 /* Task Functions */
@@ -236,7 +245,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
     while (1)
     {
-        System_printf("uartTask");
+        System_printf("uartTask\n");
         System_flush();
 
         if (programState == DATA_READY)
@@ -244,69 +253,68 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
         }
 
-        else if (programState == WAITING)
+        if (programState == WAITING)
         {
             programState = WAITING;
         }
 
-        switch (programState)
+        if (programState == RUOKINTA_TILA)
         {
-        case TOIMINTO_RUOKI:
-            sprintf(echo_msg, "%s", "Syodaan!");
+            sprintf(echo_msg, "%s", "\nSyodaan!");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-            break;
+        }
 
-        case TOIMINTO_LEIKI:
-            sprintf(echo_msg, "%s", "Leikitaan!");
+        if (programState == LIIKUNTA_TILA)
+        {
+            sprintf(echo_msg, "%s", "\nLeikitaan!");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-            break;
+        }
 
-        case TOIMINTO_NUKU:
-            sprintf(echo_msg, "%s", "ZzzZzZ...");
+        if (programState == ENERGIA_TILA)
+        {
+            sprintf(echo_msg, "%s", "\nZzzZzZ...");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-            break;
+        }
 
-        case TOIMINTO_VAROITUS:
-            sprintf(echo_msg, "%s", "SOS!");
+        if (programState == TOIMINTO_VAROITUS)
+        {
+            sprintf(echo_msg, "%s", "\nSOS!");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-            break;
+        }
 
-        case TOIMINTO_HYYTYMINEN:
-            sprintf(echo_msg, "%s", "RIP");
+        if (programState == KARKAAMINEN)
+        {
+            sprintf(echo_msg, "%s", "\nRIP");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-            break;
-
-        default: // esim. WAITING tai DATA_READY
-            break;
         }
 
         // Once per second
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(3000000 / Clock_tickPeriod);
     }
 }
 
@@ -370,7 +378,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         System_printf(debug_msg);
         System_flush();
 
-        if (programState == WAITING) // if (programState == DATA_READ)
+        if (programState == WAITING)
         {
             PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
             PIN_setOutputValue(LED1_Handle, Board_LED1, 0);
@@ -414,13 +422,83 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
         if (programState == DATA_READY)
         {
-            printf("KALA2!!\n");
-            sensorTagState = ODOTUSTILA;
+            sisainenState = TILA_0;
         }
 
-        // Once per second
-        Task_sleep(1000000L / Clock_tickPeriod);
-        printf("KALA!!\n");
+        if ((sisainenState == TILA_0) && (ax < 5) && (ay < 10) && (az < 5))
+        {
+            sisainenState = TILA_PAIKALLAAN;
+        }
+
+        if (sisainenState == TILA_PAIKALLAAN && (ambientLight < 15) && (energia < 10))
+        {
+            // tamagotchi nukkuu (pimeää)
+            energia++;
+            ravinto--;
+            System_printf("ZzzZzZz...\n");
+            sprintf(debug_msg, "energia: %d\n", energia);
+            // sprintf(debug_msg, "ravinto: %d\n", ravinto);
+            System_printf(debug_msg);
+            System_flush();
+            programState = WAITING;
+        }
+
+        if (sisainenState == TILA_0 && (ax < -0.5) && (leikki < 10))
+        {
+            // tamagotchi leikkii
+            leikki++;
+            energia--;
+            sprintf(debug_msg, "Leikitaan!: %d\n", leikki);
+            System_printf(debug_msg);
+            System_flush();
+            buzzerPlay();
+            programState = WAITING;
+        }
+
+        if (sisainenState == TILA_VALO && (ambientLight > 100) && (valoisuus < 5))
+        {
+            // valoisaa
+            valoisuus++;
+            if (ravinto < 10)
+            {
+                ravinto++;
+            }
+
+            if (leikki < 10)
+            {
+                leikki++;
+            }
+
+            if (energia)
+            {
+                energia++;
+            }
+            programState = WAITING;
+        }
+
+        // Ehto varoitukselle
+        if (energia == 2 || ravinto == 2 || leikki == 2)
+        {
+            buzzerWarning();
+            sisainenState = TILA_0;
+        }
+
+        // Ehto karkaamiselle
+        if (energia == 0 || ravinto == 0 || leikki == 0)
+        {
+            buzzerGameOver();
+            programState = KARKAAMINEN;
+            sisainenState = TILA_0;
+        }
+
+        // Tamagotchin tila
+        printf("\nravinto: %d\n", ravinto);
+        printf("leikki: %d\n", leikki);
+        printf("energia: %d\n", energia);
+        printf("valoisuus: %d\n", valoisuus);
+
+        // Kolmen sekunnin välein
+        Task_sleep(3000000 / Clock_tickPeriod);
     }
 }
 

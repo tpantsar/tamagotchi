@@ -3,7 +3,7 @@ TODO:
 - uartTaskin if (programState == ...) lauseet
 - sensorTaskin if (programState == ...) lauseet
 - liikesensorin datan analysointi
-- Musiikkifunktioiden toteutus!
+- Sävellä musiikit!
 - commTaskin toimivuus
 
 

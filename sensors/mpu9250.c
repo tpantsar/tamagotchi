@@ -182,7 +182,6 @@ void getAres()
 
 void mpu9250_setup(I2C_Handle *i2c_orig)
 {
-
 	i2c = *i2c_orig;
 
 	System_printf("MPU9250: Setup start...\n");
