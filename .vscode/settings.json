@@ -1,9 +1,11 @@
 {
     "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
+        "*.css": "css",
         "*.html": "html",
         "*.py": "python",
         "buzzer.h": "c",
-        "board.h": "c"
+        "board.h": "c",
+        "stdio.h": "c"
     }
 }

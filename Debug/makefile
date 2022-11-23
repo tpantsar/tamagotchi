@@ -19,11 +19,6 @@ ORDERED_OBJS += \
 "./sensors/mpu9250.obj" \
 "./sensors/opt3001.obj" \
 "./sensors/tmp007.obj" \
-"../src/sysbios/m3_Hwi_asm.obj" \
-"../src/sysbios/m3_Hwi_asm_switch.obj" \
-"../src/sysbios/m3_IntrinsicsSupport_asm.obj" \
-"../src/sysbios/m3_TaskSupport_asm.obj" \
-"../src/sysbios/rom_sysbios.obj" \
 "./wireless/CWC_CC2650_154Drv.obj" \
 "./wireless/CWC_IntegrTest.obj" \
 "./wireless/ERRORS.obj" \
@@ -42,11 +37,9 @@ RMDIR := RMDIR /S/Q
 -include sources.mk
 -include subdir_vars.mk
 -include sensors/subdir_vars.mk
--include src/sysbios/subdir_vars.mk
 -include wireless/subdir_vars.mk
 -include subdir_rules.mk
 -include sensors/subdir_rules.mk
--include src/sysbios/subdir_rules.mk
 -include wireless/subdir_rules.mk
 -include objects.mk
 

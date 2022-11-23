@@ -1,0 +1,638 @@
+[Cortex_M3_0] Hello world!
+MPU9250: Power ON
+
+
+uartTask
+MPU9250: Setup start...
+MPU9250: Setup OK
+OPT3001: Config write ok
+programState: 1
+OPT3001: Data not ready!
+
+0.00 lux
+-0.01, 0.03, -0.95, -0.48, -0.21, -1.38
+
+ZzzZzZ...
+ravinto: 4 NALKA!
+leikki: 5
+energia: 6
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+44.64 lux
+0.02, -0.01, -0.98, -1.05, -0.95, -0.60
+ravinto: 4 NALKA!
+leikki: 5
+energia: 6
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+0.01 lux
+-0.00, 0.02, -0.97, -0.68, -0.05, -1.23
+
+ZzzZzZ...
+ravinto: 3 NALKA!
+leikki: 5
+energia: 7
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+44.62 lux
+-0.01, 0.03, -0.97, -0.45, -0.10, 0.27
+ravinto: 3 NALKA!
+leikki: 5
+energia: 7
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+0.01 lux
+-0.00, 0.01, -0.96, -0.52, -0.44, -1.14
+
+ZzzZzZ...
+
+Varoitus!
+ravinto: 2 NALKA!
+leikki: 5
+energia: 8
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+Syodaan!
+
+44.56 lux
+0.04, -0.02, -0.99, -2.01, -0.94, 28.54
+
+Syodaan!
+ravinto: 4 NALKA!
+leikki: 3 TYLSAA!
+energia: 8
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+0.01 lux
+0.05, 0.08, -0.98, -1.19, -3.14, 7.68
+
+ZzzZzZ...
+ravinto: 3 NALKA!
+leikki: 3 TYLSAA!
+energia: 9
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+
+uartTask
+
+43.46 lux
+-0.16, -3.19, -0.09, 64.69, 95.19, -196.82
+ravinto: 3 NALKA!
+leikki: 3 TYLSAA!
+energia: 9
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+1.76 lux
+-1.11, -7.21, -2.01, 33.04, -142.75, 151.00
+
+Leikitaan!
+ravinto: 3 NALKA!
+leikki: 4 TYLSAA!
+energia: 8
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+15.41 lux
+-0.65, -2.83, -2.26, 59.14, -35.23, 85.91
+
+Leikitaan!
+ravinto: 3 NALKA!
+leikki: 5
+energia: 7
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+35.90 lux
+-0.41, 1.02, -0.12, -9.70, -31.36, -250.00
+ravinto: 3 NALKA!
+leikki: 5
+energia: 7
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+1.07 lux
+0.22, 0.09, -1.05, 2.77, 33.29, 44.74
+
+ZzzZzZ...
+
+Syodaan!
+ravinto: 3 NALKA!
+leikki: 4 TYLSAA!
+energia: 8
+aurinko: 2 Rannalle?
+Syodaan!
+
+
+uartTask
+programState: 1
+
+29.22 lux
+0.13, 2.72, -2.63, 2.60, 66.10, 38.38
+ravinto: 4 NALKA!
+leikki: 3 TYLSAA!
+energia: 8
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+1.17 lux
+0.13, -0.78, 0.62, 115.73, 22.79, 1.20
+
+ZzzZzZ...
+ravinto: 3 NALKA!
+leikki: 3 TYLSAA!
+energia: 9
+aurinko: 2 Rannalle?
+
+uartTask
+programState: 1
+
+1761.92 lux
+0.01, -0.77, 0.69, -0.39, 4.91, -3.66
+
+Aurinko paistaa!
+ravinto: 4 NALKA!
+leikki: 4 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+1567.36 lux
+0.02, -0.75, 0.74, -3.04, 3.04, -2.33
+
+Aurinko paistaa!
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+1547.52 lux
+0.00, -0.73, 0.74, 1.20, 0.27, -0.86
+
+Et voi ottaa aurinkoa!
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+1482.88 lux
+-0.00, -0.70, 0.78, -1.08, -0.63, -0.51
+
+Et voi ottaa aurinkoa!
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+1492.48 lux
+-0.00, -0.68, 0.75, -0.98, 0.27, -0.25
+
+Et voi ottaa aurinkoa!
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+336.32 lux
+0.01, 0.01, -1.00, -0.93, -0.19, 1.39
+
+Et voi ottaa aurinkoa!
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+44.56 lux
+0.01, 0.01, -0.94, -0.79, -0.55, -0.25
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.02, 0.01, -0.97, -0.76, -0.66, -0.61
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+
+uartTask
+
+0.01 lux
+0.01, -0.01, -0.97, -0.60, -0.42, -0.70
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+-0.02, 0.02, -0.95, 0.24, -0.91, 0.22
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+-0.01, 0.01, -0.97, -0.43, -0.09, 0.18
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.04, 0.01, -0.96, -0.68, -0.46, -0.23
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.03, -0.02, -0.98, -0.11, -0.18, 0.35
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.02, -0.00, -0.99, -0.64, -0.74, -0.45
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.03, -0.01, -0.97, -0.08, 0.14, -0.75
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.00, 0.01, -0.96, -0.92, -0.24, -0.33
+ravinto: 5
+leikki: 5
+energia: 10
+aurinko: 0
+
+uartTask
+
+Syodaan!
+programState: 1
+
+44.56 lux
+-0.02, -0.01, -0.99, -0.96, 0.37, 0.80
+ravinto: 6
+leikki: 4 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+-0.01, 0.01, -0.99, -0.37, -1.37, -1.09
+ravinto: 6
+leikki: 4 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.01, -0.03, -0.99, -0.54, -1.04, -0.69
+ravinto: 6
+leikki: 4 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+
+Syodaan!
+
+Syodaan!
+programState: 3
+
+Varoitus!
+
+Voit ottaa taas aurinkoa!
+ravinto: 8
+leikki: 2 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+44.62 lux
+-0.01, 0.00, -0.96, -0.56, -0.47, -0.95
+
+Varoitus!
+ravinto: 8
+leikki: 2 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+0.01 lux
+0.02, 0.02, -0.98, -0.35, 0.40, 0.34
+
+Varoitus!
+ravinto: 8
+leikki: 2 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+0.01 lux
+0.03, -0.01, -0.97, -0.74, 0.08, -0.38
+
+Varoitus!
+ravinto: 8
+leikki: 2 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+
+Syodaan!
+programState: 3
+ravinto: 9
+leikki: 1 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+
+uartTask
+
+44.54 lux
+0.03, -0.01, -0.99, -0.08, -0.27, 0.39
+ravinto: 9
+leikki: 1 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+0.03 lux
+0.19, -0.87, 0.55, 1.76, 1.47, -10.82
+ravinto: 9
+leikki: 1 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+1074.88 lux
+0.18, -0.87, 0.57, 0.22, -3.47, 0.24
+
+Aurinko paistaa!
+
+Varoitus!
+
+Voit ottaa taas aurinkoa!
+ravinto: 10
+leikki: 2 TYLSAA!
+energia: 10
+aurinko: 1 Rannalle?
+
+uartTask
+programState: 1
+
+1010.88 lux
+0.19, -0.85, 0.58, 1.69, -1.34, -0.15
+
+Aurinko paistaa!
+ravinto: 10
+leikki: 3 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+1040.96 lux
+0.16, -0.80, 0.63, -2.46, -1.65, -0.24
+
+Et voi ottaa aurinkoa!
+ravinto: 10
+leikki: 3 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+816.32 lux
+0.14, -0.83, 0.61, -13.41, 3.94, 1.56
+
+Et voi ottaa aurinkoa!
+ravinto: 10
+leikki: 3 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+44.44 lux
+0.01, 0.00, -0.98, -0.67, -0.88, -0.07
+ravinto: 10
+leikki: 3 TYLSAA!
+energia: 10
+aurinko: 0
+
+uartTask
+programState: 1
+
+1.40 lux
+-1.00, 0.92, 0.06, -20.10, -126.59, -250.00
+
+Leikitaan!
+ravinto: 10
+leikki: 4 TYLSAA!
+energia: 9
+aurinko: 0
+
+uartTask
+programState: 1
+
+43.66 lux
+-0.21, 5.22, -1.49, 76.48, -0.03, -69.21
+ravinto: 10
+leikki: 4 TYLSAA!
+energia: 9
+aurinko: 0
+
+uartTask
+programState: 1
+
+1.42 lux
+-0.55, 4.28, -1.61, 25.34, 27.64, -142.37
+
+Leikitaan!
+ravinto: 10
+leikki: 5
+energia: 8
+aurinko: 0
+
+uartTask
+programState: 1
+
+43.76 lux
+-1.06, -2.14, -0.10, 49.61, -58.16, 249.99
+
+Leikitaan!
+ravinto: 10
+leikki: 6
+energia: 7
+aurinko: 0
+
+uartTask
+programState: 1
+
+43.68 lux
+-0.98, -1.87, -0.10, 33.14, -5.14, 249.99
+
+Leikitaan!
+ravinto: 10
+leikki: 7
+energia: 6
+aurinko: 0
+
+uartTask
+programState: 1
+
+44.54 lux
+0.02, -0.01, -0.95, -0.56, -0.58, -0.17
+ravinto: 10
+leikki: 7
+energia: 6
+aurinko: 0
+
+uartTask
+programState: 1
+
+0.01 lux
+0.02, 0.00, -0.98, -0.05, -0.56, 0.18
+
+ZzzZzZ...
+ravinto: 9
+leikki: 7
+energia: 7
+aurinko: 0
+
+uartTask
+programState: 1
+
+44.54 lux
+0.02, 0.03, -0.98, 0.04, -0.09, 0.12
+ravinto: 9
+leikki: 7
+energia: 7
+aurinko: 0
+
+uartTask
+programState: 1
+
+
+uartTask
+
+0.01 lux
+0.05, 0.01, -0.98, -0.89, -0.92, -0.14
+
+ZzzZzZ...
+ravinto: 8
+leikki: 7
+energia: 8
+aurinko: 0
+
+uartTask
+programState: 1
+
+2.19 lux

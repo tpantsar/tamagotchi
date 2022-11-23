@@ -50,10 +50,10 @@ enum state
 {
     WAITING = 1,
     DATA_READY,
-    RUOKINTA_TILA, // ravinto++, leikki--
-    LIIKUNTA_TILA, // leikki++, energia--
-    ENERGIA_TILA,  // energia++, ravinto--
-    TOIMINTO_VAROITUS,
+    RUOKINTA_TILA,   // ravinto++, leikki--
+    LIIKUNTA_TILA,   // leikki++, energia--
+    ENERGIA_TILA,    // energia++, ravinto--
+    AKTIVOINTI_TILA, // ravinto++, leikki++, energia++
     KARKAAMINEN
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
@@ -71,15 +71,12 @@ enum tila
 // Globaali tilamuuttuja, alustetaan odotustilaan
 enum tila sisainenState = TILA_0;
 
-// Merkkijonomuuttujat tulostuksille
-char debug_msg[100];
-
 // Globaalit muuttujat Tamagotchin ominaisuuksille
 double ambientLight = -1000.0;
 int ravinto = 5;
 int leikki = 5;
 int energia = 5;
-int valoisuus = 2;
+int aurinko = 2;
 
 /* PINNIEN ALUSTUKSET JA MUUTTUJAT */
 
@@ -134,9 +131,17 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 {
     if (ravinto < 10)
     {
+        System_printf("\nSyodaan!\n"); // Debug
+        System_flush();
         ravinto++;
         leikki--;
     }
+    else
+    {
+        System_printf("\nMaha taynna!\n"); // Debug
+        System_flush();
+    }
+
     programState = RUOKINTA_TILA;
 }
 
@@ -211,9 +216,10 @@ void buzzerGameOver(void)
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1)
 {
-    char input;
+    Task_sleep(100000 / Clock_tickPeriod);
     char echo_msg[30];
 
+    /*
     // UART-kirjaston asetukset
     UART_Handle uart;
     UART_Params uartParams;
@@ -236,29 +242,31 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         System_abort("Error opening the UART");
     }
 
-    // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
+    char input[30];
     UART_read(uart, &input, 1);
 
     // Lähetetään merkkijono takaisin
     sprintf(echo_msg, "uartTask: %lf luksia\n\r", ambientLight);
     UART_write(uart, echo_msg, strlen(echo_msg));
+    */
 
     while (1)
     {
-        System_printf("uartTask\n");
-        System_flush();
+        // System_printf("\n\nuartTask\n");
+        // System_flush();
 
         if (programState == DATA_READY)
         {
             programState = WAITING;
         }
 
-        if (programState == WAITING)
+        else if (programState == WAITING)
         {
             programState = WAITING;
         }
 
-        if (programState == RUOKINTA_TILA)
+        // Syöminen (toimii painonapilla)
+        else if (programState == RUOKINTA_TILA)
         {
             sprintf(echo_msg, "%s", "\nSyodaan!");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
@@ -269,31 +277,36 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
         }
 
-        if (programState == LIIKUNTA_TILA)
-        {
-            sprintf(echo_msg, "%s", "\nLeikitaan!");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
-
-            // Punainen ledi päälle
-            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
-            programState = WAITING;
-        }
-
-        if (programState == ENERGIA_TILA)
+        // Nukkuminen
+        else if (programState == ENERGIA_TILA)
         {
             sprintf(echo_msg, "%s", "\nZzzZzZ...");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
+            buzzerSleep(); // musiikki
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
         }
 
-        if (programState == TOIMINTO_VAROITUS)
+        // Leikkiminen
+        else if (programState == LIIKUNTA_TILA)
         {
-            sprintf(echo_msg, "%s", "\nSOS!");
+            sprintf(echo_msg, "%s", "\nLeikitaan!");
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
+            StartReceive6LoWPAN();
+            buzzerPlay(); // musiikki
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+            programState = WAITING;
+        }
+
+        // Auringonotto
+        else if (programState == AKTIVOINTI_TILA)
+        {
+            sprintf(echo_msg, "%s", "\nOtetaan aurinkoa!");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
 
@@ -302,18 +315,20 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
         }
 
-        if (programState == KARKAAMINEN)
+        // Hyytyminen
+        else if (programState == KARKAAMINEN)
         {
+            // Molemmat ledit päälle
+            PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+
             sprintf(echo_msg, "%s", "\nRIP");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
             StartReceive6LoWPAN();
-
-            // Punainen ledi päälle
-            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
-            programState = WAITING;
+            buzzerGameOver(); // musiikki
         }
 
-        // Once per second
+        // Taski nukkumaan
         Task_sleep(3000000 / Clock_tickPeriod);
     }
 }
@@ -325,6 +340,15 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     I2C_Params i2cParams;
     I2C_Handle i2cMPU; // Own i2c-interface for MPU9250 sensor
     I2C_Params i2cMPUParams;
+
+    // Merkkijonomuuttujat tulostuksille
+    // char debug_msg[100];
+    char merkkijono_programState[50];
+    char merkkijono_valoisuus[50];
+    char merkkijono_liike[100];
+    char merkkijono_leikki[100];
+    char merkkijono_energia[20];
+    char merkkijono_ravinto[20];
 
     // Alustetaan i2c-väylä
     I2C_Params_init(&i2cParams);
@@ -374,8 +398,8 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     while (1)
     {
-        sprintf(debug_msg, "programState: %d\n", programState);
-        System_printf(debug_msg);
+        sprintf(merkkijono_programState, "\n\nprogramState: %d\n", programState);
+        System_printf(merkkijono_programState);
         System_flush();
 
         if (programState == WAITING)
@@ -408,13 +432,13 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             I2C_close(i2cMPU);
 
             // Print OPT3001 values (ambientLight)
-            sprintf(debug_msg, "%.2lf luksia\n", ambientLight);
-            System_printf(debug_msg);
+            sprintf(merkkijono_valoisuus, "%.2lf luksia\n", ambientLight);
+            System_printf(merkkijono_valoisuus);
             System_flush();
 
             // Print MPU values (motion)
-            sprintf(debug_msg, "%.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n", ax, ay, az, gx, gy, gz);
-            System_printf(debug_msg);
+            sprintf(merkkijono_liike, "%.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n", ax, ay, az, gx, gy, gz);
+            System_printf(merkkijono_liike);
             System_flush();
 
             programState = DATA_READY;
@@ -425,80 +449,159 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             sisainenState = TILA_0;
         }
 
+        // sensorTag on liikkeessä
+        if (sisainenState == TILA_0 && ax < -0.5)
+        {
+            sisainenState = TILA_LIIKKUU;
+        }
+
+        // sensorTag on paikallaan
         if ((sisainenState == TILA_0) && (ax < 5) && (ay < 10) && (az < 5))
         {
             sisainenState = TILA_PAIKALLAAN;
         }
 
-        if (sisainenState == TILA_PAIKALLAAN && (ambientLight < 15) && (energia < 10))
+        // LEIKKIMINEN (liikesensori)
+        if (sisainenState == TILA_LIIKKUU && leikki < 10)
         {
-            // tamagotchi nukkuu (pimeää)
-            energia++;
-            ravinto--;
-            System_printf("ZzzZzZz...\n");
-            sprintf(debug_msg, "energia: %d\n", energia);
-            // sprintf(debug_msg, "ravinto: %d\n", ravinto);
-            System_printf(debug_msg);
-            System_flush();
-            programState = WAITING;
-        }
-
-        if (sisainenState == TILA_0 && (ax < -0.5) && (leikki < 10))
-        {
-            // tamagotchi leikkii
             leikki++;
             energia--;
-            sprintf(debug_msg, "Leikitaan!: %d\n", leikki);
-            System_printf(debug_msg);
+            System_printf("\nLeikitaan!\n");
             System_flush();
-            buzzerPlay();
-            programState = WAITING;
+            programState = LIIKUNTA_TILA;
         }
 
-        if (sisainenState == TILA_VALO && (ambientLight > 100) && (valoisuus < 5))
+        // sensorTag on pimeässä
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 15)
         {
-            // valoisaa
-            valoisuus++;
-            if (ravinto < 10)
-            {
-                ravinto++;
-            }
-
-            if (leikki < 10)
-            {
-                leikki++;
-            }
-
-            if (energia)
-            {
-                energia++;
-            }
-            programState = WAITING;
+            sisainenState = TILA_PIMEA;
         }
 
-        // Ehto varoitukselle
+        // sensorTag on valoisassa
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight > 100)
+        {
+            sisainenState = TILA_VALO;
+        }
+
+        // NUKKUMINEN (liikesensori + valosensori)
+        if (sisainenState == TILA_PIMEA && energia < 10)
+        {
+            System_printf("\nZzzZzZ...\n");
+            System_flush();
+            energia++;
+            ravinto--;
+
+            /*
+            sprintf(merkkijono_energia, "energia: %d\n", energia);
+            System_printf(merkkijono_energia);
+            System_flush();
+
+            sprintf(merkkijono_ravinto, "ravinto: %d\n", ravinto);
+            System_printf(merkkijono_ravinto);
+            System_flush();
+            */
+
+            programState = ENERGIA_TILA;
+            sisainenState = TILA_0;
+        }
+
+        // AURINGONOTTO
+        if (sisainenState == TILA_VALO)
+        {
+            // Lisätään kaikkia ominaisuuksia yhdellä mikäli aurinko > 0.
+            // Samalla auringonottojen maara vahenee.
+            if (aurinko > 0)
+            {
+                System_printf("\nAurinko paistaa!\n"); // Debug
+                System_flush();
+                aurinko--;
+                if (ravinto < 10)
+                {
+                    ravinto++;
+                }
+
+                if (leikki < 10)
+                {
+                    leikki++;
+                }
+
+                if (energia < 10)
+                {
+                    energia++;
+                }
+            }
+            else
+            {
+                System_printf("\nEt voi ottaa aurinkoa!\n");
+                System_flush();
+            }
+
+            programState = AKTIVOINTI_TILA;
+        }
+
+        // Varoitusääni
         if (energia == 2 || ravinto == 2 || leikki == 2)
         {
-            buzzerWarning();
+            System_printf("\nVaroitus!\n"); // Debug
+            System_flush();
+
+            // Lisätään valoisuutta yhdellä, jotta voi ottaa taas aurinkoa
+            if (aurinko < 1)
+            {
+                aurinko++;
+                System_printf("\nVoit ottaa taas aurinkoa!\n"); // Debug
+                System_flush();
+            }
+
+            // Punainen ledi päälle
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
+
+            buzzerWarning(); // musiikki
+
+            // Punainen ledi pois
+            PIN_setOutputValue(LED1_Handle, Board_LED1, 0);
+
             sisainenState = TILA_0;
         }
 
-        // Ehto karkaamiselle
+        // Hyytyminen
         if (energia == 0 || ravinto == 0 || leikki == 0)
         {
-            buzzerGameOver();
+            System_printf("\nHyytyminen\n"); // Debug
             programState = KARKAAMINEN;
-            sisainenState = TILA_0;
+            // sisainenState = TILA_0;
         }
 
-        // Tamagotchin tila
-        printf("\nravinto: %d\n", ravinto);
-        printf("leikki: %d\n", leikki);
-        printf("energia: %d\n", energia);
-        printf("valoisuus: %d\n", valoisuus);
+        // Tulostaa tamagotchin ominaisuudet
+        debugFxn();
 
-        // Kolmen sekunnin välein
+        // Taski nukkumaan
         Task_sleep(3000000 / Clock_tickPeriod);
+    }
+}
+
+// Tulostaa kaikki tamagotchin ominaisuudet konsoliin
+void debugFxn(void)
+{
+    System_printf("\nravinto: %d", ravinto);
+    if (ravinto < 5)
+    {
+        System_printf(" NALKA!");
+    }
+    System_printf("\nleikki: %d", leikki);
+    if (leikki < 5)
+    {
+        System_printf(" TYLSAA!");
+    }
+    System_printf("\nenergia: %d", energia);
+    if (energia < 5)
+    {
+        System_printf(" VASYTTAA!");
+    }
+    System_printf("\naurinko: %d", aurinko);
+    if (aurinko > 0)
+    {
+        System_printf(" Rannalle?");
     }
 }
 

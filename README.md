@@ -1,10 +1,11 @@
 TODO:
-- Selvitä, voiko painonappia painaa pohjassa ja samaan aikaan käyttää liikesensoria
-- uartTaskin if (programState == ...) lauseet
-- sensorTaskin if (programState == ...) lauseet
-- liikesensorin datan analysointi
-- Sävellä musiikit!
-- commTaskin toimivuus
+✅ uartTaskin if (programState == ...) lauseet
+✅ sensorTaskin if (programState == ...) lauseet
+✅ liikesensorin datan analysointi
+🟨 Sävellä musiikit!
+🟨 commTaskin toimivuus
+🟨 Alusta etäyhteys!
+🟨 Selvitä, voiko painonappia painaa pohjassa ja samaan aikaan käyttää liikesensoria
 
 
 
@@ -16,6 +17,20 @@ tila_liikkuu (sisainenState) -> liikunta_tila (programState, sensorTask -> UART)
 liikunta_tila (programState, sensorTask -> UART) -> WAITING (programState, UART)
 
 
+
+Konsolin tulostus:
+
+uartTask
+programState: 1
+
+0.01 lux
+0.02, 0.00, -0.98, -0.05, -0.56, 0.18
+
+ZzzZzZ...
+ravinto: 9
+leikki: 7
+energia: 7
+aurinko: 0
 
 
 
