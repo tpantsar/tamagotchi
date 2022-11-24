@@ -245,10 +245,10 @@ project_main.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24
 project_main.obj: ../Board.h
 project_main.obj: ../CC2650STK.h
 project_main.obj: ../wireless/comm_lib.h
-project_main.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_CC2650_154Drv.h
+project_main.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_CC2650_154Drv.h
 project_main.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_data_entry.h
 project_main.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_mailbox.h
-project_main.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/address.h
+project_main.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/address.h
 project_main.obj: ../sensors/opt3001.h
 project_main.obj: ../sensors/mpu9250.h
 project_main.obj: ../sensors/tmp007.h
@@ -744,13 +744,13 @@ C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/inc/hw_g
 
 ../wireless/comm_lib.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_CC2650_154Drv.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_CC2650_154Drv.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_data_entry.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_mailbox.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/address.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/address.h:
 
 ../sensors/opt3001.h:
 

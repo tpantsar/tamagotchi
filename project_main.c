@@ -39,6 +39,16 @@
 #include "sensors/tmp007.h"
 #include "buzzer.h"
 
+// Merkkijonot taustajärjestelmää varten
+char ruokimsg[20] = "id:2230,EAT:2";
+char leikimsg[20] = "id:2230,PET:2";
+char liikumsg[20] = "id:2230,EXERCISE:2";
+char nukumsg[20] = "id:2230,MSG1:ZzzZzZ...";
+char survivalmsg[45] = "id:2230,MSG1:Sceptical,MSG2:Planning escape..";
+char survivalmsgRadio[25] = "id:2230,MSG1:Sceptical";
+char aktivoimsg[25] = "id:2230,ACTIVATE:2;2;2";
+char gameOvermsg[25] = "id:2230,MSG1:RIP!";
+
 /* Task */
 #define STACKSIZE 2048
 char sensorTaskStack[STACKSIZE];
@@ -213,13 +223,18 @@ void buzzerGameOver(void)
     */
 }
 
+void messageFxn(char *msg, int length)
+{
+    Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t *)msg, length); // viestitys radio paalla
+    StartReceive6LoWPAN();
+}
+
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1)
 {
     Task_sleep(100000 / Clock_tickPeriod);
     char echo_msg[30];
 
-    /*
     // UART-kirjaston asetukset
     UART_Handle uart;
     UART_Params uartParams;
@@ -242,6 +257,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         System_abort("Error opening the UART");
     }
 
+    /*
     char input[30];
     UART_read(uart, &input, 1);
 
@@ -269,8 +285,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         else if (programState == RUOKINTA_TILA)
         {
             sprintf(echo_msg, "%s", "\nSyodaan!");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
+            messageFxn(ruokimsg, strlen(ruokimsg));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -281,8 +296,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         else if (programState == ENERGIA_TILA)
         {
             sprintf(echo_msg, "%s", "\nZzzZzZ...");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
+            messageFxn(nukumsg, strlen(nukumsg));
             buzzerSleep(); // musiikki
 
             // Punainen ledi päälle
@@ -294,8 +308,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         else if (programState == LIIKUNTA_TILA)
         {
             sprintf(echo_msg, "%s", "\nLeikitaan!");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
+            messageFxn(liikumsg, strlen(liikumsg));
             buzzerPlay(); // musiikki
 
             // Punainen ledi päälle
@@ -303,12 +316,11 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
         }
 
-        // Auringonotto
+        // Auringonotto (aktivointi)
         else if (programState == AKTIVOINTI_TILA)
         {
             sprintf(echo_msg, "%s", "\nOtetaan aurinkoa!");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
+            messageFxn(aktivoimsg, strlen(aktivoimsg));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -321,10 +333,8 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             // Molemmat ledit päälle
             PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
-
             sprintf(echo_msg, "%s", "\nRIP");
-            Send6LoWPAN(IEEE80154_SERVER_ADDR, echo_msg, strlen(echo_msg));
-            StartReceive6LoWPAN();
+            messageFxn(gameOvermsg, strlen(gameOvermsg));
             buzzerGameOver(); // musiikki
         }
 

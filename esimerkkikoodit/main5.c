@@ -36,6 +36,7 @@
 #define BLENGTH 80         // viestin pituus joka kerataan bufferista
 
 void sendMsg(UART_Handle handle, char *msg, int length);
+
 // viestit taustajarjestelmaan
 char ruokimsg[20] = "id:153,EAT:2";
 char leikimsg[20] = "id:153,PET:2";

@@ -171,14 +171,14 @@ wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_
 wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/interfaces/IHwi.h
 wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/family/arm/m3/Hwi__epilogue.h
 wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/hal/package/Hwi_HwiProxy.h
-wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/comm_lib.h
-wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_CC2650_154Drv.h
+wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/comm_lib.h
+wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_CC2650_154Drv.h
 wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_data_entry.h
 wireless/comm_lib.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_mailbox.h
 wireless/comm_lib.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/string.h
 wireless/comm_lib.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/xlocale/_string.h
-wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/address.h
-wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_IntegrTest.h
+wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/address.h
+wireless/comm_lib.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_IntegrTest.h
 
 ../wireless/comm_lib.c:
 
@@ -522,9 +522,9 @@ C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbi
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/hal/package/Hwi_HwiProxy.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/comm_lib.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/comm_lib.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_CC2650_154Drv.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_CC2650_154Drv.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/rf_data_entry.h:
 
@@ -534,7 +534,7 @@ C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/string.h:
 
 C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/xlocale/_string.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/address.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/address.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/wireless/CWC_IntegrTest.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/wireless/CWC_IntegrTest.h:
 

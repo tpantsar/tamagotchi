@@ -92,13 +92,13 @@ sensors/opt3001.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IInstan
 sensors/opt3001.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IGateProvider.h
 sensors/opt3001.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/package/System_SupportProxy.h
 sensors/opt3001.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/package/System_Module_GateProxy.h
-sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/sensors/opt3001.h
+sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/sensors/opt3001.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/I2C.h
 sensors/opt3001.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdbool.h
-sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/Board.h
+sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/Board.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/Power.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/utils/List.h
-sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/CC2650STK.h
+sensors/opt3001.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/CC2650STK.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/PIN.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/ioc.h
 sensors/opt3001.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/inc/hw_types.h
@@ -301,19 +301,19 @@ C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/package/System_SupportProxy.
 
 C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/package/System_Module_GateProxy.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/sensors/opt3001.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/sensors/opt3001.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/I2C.h:
 
 C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdbool.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/Board.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/Board.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/Power.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/utils/List.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo/CC2650STK.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/CC2650STK.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/PIN.h:
 

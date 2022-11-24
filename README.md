@@ -8,7 +8,6 @@ TODO:
 🟨 Selvitä, voiko painonappia painaa pohjassa ja samaan aikaan käyttää liikesensoria
 
 
-
 programState kaavio: sensorTaskista uartTaskiin !
 
 Data_ready (programState) -> tila_0 (sisainenState)
