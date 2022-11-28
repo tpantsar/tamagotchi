@@ -3,8 +3,8 @@ enum state
 {
     WAITING = 1,
     DATA_READY,
-    RUOKINTA_TILA, // ravinto++
-    LIIKUNTA_TILA, // leikki++
+    RUOKI, // ravinto++
+    LEIKKI, // leikki++
     ENERGIA_TILA,  // energia++
     TOIMINTO_VAROITUS,
     KARKAAMINEN

@@ -51,14 +51,14 @@ enum state
 {
     WAITING = 1, // DATA_READ
     DATA_READY,
-    RUOKINTA_TILA,
-    LIIKUNTA_TILA,
+    RUOKI,
+    LEIKKI,
     ENERGIA_TILA,
-    HOIVA_TILA,
     AKTIVOINTI_TILA,
-    KARKAAMINEN
+    KARKAAMINEN,
+    HOIVA_TILA
 };
-enum state programState = WAITING; // DATA_READ
+enum state programState = WAITING;
 
 // Sisainen tilakone
 enum tila
@@ -68,7 +68,7 @@ enum tila
     TILA_LIIKKUU,
     TILA_VALO,
     TILA_PIMEA,
-    TILA_LAMPO
+    TILA_LAMPO // lamposensori
 };
 enum tila sisainenState = TILA_0;
 
@@ -146,7 +146,7 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
     {
         ravinto++;
     }
-    programState = RUOKINTA_TILA;
+    programState = RUOKI;
 }
 
 void musiikkiFunktioLiikunta(void)
@@ -287,7 +287,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // Syöminen (toimii painonapilla)
-        else if (programState == RUOKINTA_TILA)
+        else if (programState == RUOKI)
         {
             sprintf(viesti, "%s", "ping");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, viesti, strlen(viesti));
@@ -304,7 +304,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // Leikkiminen
-        else if (programState == LIIKUNTA_TILA)
+        else if (programState == LEIKKI)
         {
             programState = WAITING;
         }
@@ -500,7 +500,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             System_printf(merkkijono_liikunta);
             System_flush();
             musiikkiFunktioLiikunta();
-            programState = LIIKUNTA_TILA;
+            programState = LEIKKI;
         }
 
         // sensorTag on pimeässä

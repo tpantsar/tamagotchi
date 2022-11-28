@@ -38,14 +38,14 @@
 void sendMsg(UART_Handle handle, char *msg, int length);
 
 // viestit taustajarjestelmaan
-char ruokimsg[20] = "id:153,EAT:2";
-char leikimsg[20] = "id:153,PET:2";
-char liikumsg[20] = "id:153,EXERCISE:2";
+char messageRuoki[20] = "id:153,EAT:2";
+char messageLeiki[20] = "id:153,PET:2";
+char messageLeikki[20] = "id:153,EXERCISE:2";
 char hoivamsg[50] = "id:153,MSG1:Happy,MSG2:Can survive rough times";
 char hoivamsgRadio[20] = "id:153,MSG1:Happy";
-char survivalmsg[45] = "id:153,MSG1:Sceptical,MSG2:Planning escape..";
-char survivalmsgRadio[25] = "id:153,MSG1:Sceptical";
-char aktivoimsg[25] = "id:153,ACTIVATE:3;3;3";
+char messageVaroitus[45] = "id:153,MSG1:Sceptical,MSG2:Planning escape..";
+char messageVaroitusRadio[25] = "id:153,MSG1:Sceptical";
+char messageAktivoi[25] = "id:153,ACTIVATE:3;3;3";
 
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
@@ -75,7 +75,7 @@ enum state
     WAITING,
     DATA_READY,
     RUOKI,
-    LIIKUNTA,
+    LEIKKI,
     HOIVA,
     AKTIVOI,
     LEIKI
@@ -296,7 +296,7 @@ void analyseDataFxn(UArg arg0, UArg arg1)
             { // primary moves (vasemmasta napista muuttaa primary-secondary)
                 if (analyseLiiku())
                 {
-                    programState = LIIKUNTA;
+                    programState = LEIKKI;
                     if (aaniState == SILENCE)
                     {
                         aaniState = TWOBEEPS;
@@ -425,10 +425,8 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
     while (1)
     {
-
         if (commState == RADIO && GetRXFlag())
         {
-
             // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
 
             // Luetaan viesti puskuriin payload
@@ -446,14 +444,14 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         survive = readMsg(); // lukee taustajarjestelman lahettamat viestit (UART) - radioviesteille tarttee tehda viela jotain.
         if (survive)
         {
-            sendMsg(uart, aktivoimsg, strlen(aktivoimsg));
+            sendMsg(uart, messageAktivoi, strlen(messageAktivoi));
             if (commState == GATEWAY)
             {
-                sendMsg(uart, survivalmsg, strlen(survivalmsg));
+                sendMsg(uart, messageVaroitus, strlen(messageVaroitus));
             }
             else
             {
-                sendMsg(uart, survivalmsgRadio, strlen(survivalmsgRadio)); // radion kautta toivottiin lyhyita viesteja
+                sendMsg(uart, messageVaroitusRadio, strlen(messageVaroitusRadio)); // radion kautta toivottiin lyhyita viesteja
             }
             isHappy = 0; // ei ole enaa tyytyvainen
             survive = 0; // flag muutetaan
@@ -462,11 +460,11 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         switch (programState)
         {
         case RUOKI:
-            sendMsg(uart, ruokimsg, strlen(ruokimsg));
+            sendMsg(uart, messageRuoki, strlen(messageRuoki));
             programState = WAITING;
             break;
-        case LIIKUNTA:
-            sendMsg(uart, liikumsg, strlen(liikumsg));
+        case LEIKKI:
+            sendMsg(uart, messageLeikki, strlen(messageLeikki));
             programState = WAITING;
             break;
         case HOIVA:
@@ -481,11 +479,11 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
             break;
         case AKTIVOI:
-            sendMsg(uart, aktivoimsg, strlen(aktivoimsg));
+            sendMsg(uart, messageAktivoi, strlen(messageAktivoi));
             programState = WAITING;
             break;
         case LEIKI:
-            sendMsg(uart, leikimsg, strlen(leikimsg));
+            sendMsg(uart, messageLeiki, strlen(messageLeiki));
             programState = WAITING;
             break;
         default:
@@ -496,8 +494,8 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         Task_sleep(1000000 / Clock_tickPeriod); // 1 sekunti
     }
 }
-// Taskifunktio
 
+// Taskifunktio
 void sensorTaskFxn(UArg arg0, UArg arg1)
 {
     // alaledi paalle
@@ -555,6 +553,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     {
         System_abort("Error Initializing I2C\n");
     }
+    
     Task_sleep(100000 / Clock_tickPeriod);
     opt3001_setup(&i2c);
     I2C_close(i2c);
@@ -572,9 +571,9 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
                 i2c = I2C_open(Board_I2C_TMP, &i2cParams); // muiden sensorien vayla auki
                 temperature = tmp007_get_data(&i2c);       // datan lukemiset globaaliin muuttujaan
                 I2C_close(i2c);                            // datat luettu niin kiinni
-
-                // VALOSENSORI:n luku n. 2 sekunnin valein
             }
+
+            // VALOSENSORI:n luku n. 2 sekunnin valein
             else if (sensorCounter % 11 == 0)
             {
                 i2c = I2C_open(Board_I2C_TMP, &i2cParams); // muiden sensorien vayla auki
@@ -584,9 +583,9 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
                     ambientLight = light; // purkkaratkaisu valomittarin hitauteen, saa parantaa jos keksii miten
                 }
                 I2C_close(i2c); // datat luettu niin kiinni
-
-                // LIIKESENSORI:n luku n. 0,2 sekunnin valein
             }
+
+            // LIIKESENSORI:n luku n. 0,2 sekunnin valein
             else
             {
                 i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);                                                                      // mpu (liiketunnistin) vÃ¤ylÃ¤ auki (vain 1kpl vaylia kerrallaan auki)
@@ -614,7 +613,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-Int main(void)
+int main(void)
 {
     // Task variables
     Task_Handle sensorTaskHandle;

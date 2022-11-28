@@ -43,7 +43,7 @@
 char ruokimsg[20] = "id:2230,EAT:2";
 char leikimsg[20] = "id:2230,PET:2";
 char liikumsg[20] = "id:2230,EXERCISE:2";
-char nukumsg[20] = "id:2230,MSG1:ZzzZzZ...";
+char nukumsg[25] = "id:2230,MSG1:ZzzZzZ...";
 char survivalmsg[45] = "id:2230,MSG1:Sceptical,MSG2:Planning escape..";
 char survivalmsgRadio[25] = "id:2230,MSG1:Sceptical";
 char aktivoimsg[25] = "id:2230,ACTIVATE:2;2;2";
@@ -60,10 +60,10 @@ enum state
 {
     WAITING = 1,
     DATA_READY,
-    RUOKINTA_TILA,   // ravinto++, leikki--
-    LIIKUNTA_TILA,   // leikki++, energia--
-    ENERGIA_TILA,    // energia++, ravinto--
-    AKTIVOINTI_TILA, // ravinto++, leikki++, energia++
+    RUOKINTA_TILA,   // ravinto++
+    LIIKUNTA_TILA,   // leikki++
+    ENERGIA_TILA,    // energia++
+    AKTIVOINTI_TILA, // ravinto++, leikki++, energia++, aurinko--
     KARKAAMINEN
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
@@ -144,7 +144,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
         System_printf("\nSyodaan!\n"); // Debug
         System_flush();
         ravinto++;
-        leikki--;
     }
     else
     {
@@ -225,6 +224,10 @@ void buzzerGameOver(void)
 
 void messageFxn(char *msg, int length)
 {
+    if (msg == NULL)
+    {
+        return;
+    }
     Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t *)msg, length); // viestitys radio paalla
     StartReceive6LoWPAN();
 }
@@ -474,8 +477,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         // LEIKKIMINEN (liikesensori)
         if (sisainenState == TILA_LIIKKUU && leikki < 10)
         {
-            leikki++;
-            energia--;
             System_printf("\nLeikitaan!\n");
             System_flush();
             programState = LIIKUNTA_TILA;
@@ -499,7 +500,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             System_printf("\nZzzZzZ...\n");
             System_flush();
             energia++;
-            ravinto--;
 
             /*
             sprintf(merkkijono_energia, "energia: %d\n", energia);
@@ -594,26 +594,13 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 void debugFxn(void)
 {
     System_printf("\nravinto: %d", ravinto);
-    if (ravinto < 5)
-    {
-        System_printf(" NALKA!");
-    }
     System_printf("\nleikki: %d", leikki);
-    if (leikki < 5)
-    {
-        System_printf(" TYLSAA!");
-    }
     System_printf("\nenergia: %d", energia);
-    if (energia < 5)
-    {
-        System_printf(" VASYTTAA!");
-    }
     System_printf("\naurinko: %d", aurinko);
-    if (aurinko > 0)
-    {
-        System_printf(" Rannalle?");
-    }
 }
+
+
+
 
 // Langaton viestintä
 void commTask(UArg arg0, UArg arg1)
@@ -644,6 +631,10 @@ void commTask(UArg arg0, UArg arg1)
         }
     }
 }
+
+
+
+
 
 int main(void)
 {
