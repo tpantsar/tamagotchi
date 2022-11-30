@@ -151,11 +151,11 @@ sensors/hdc1000.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Types.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/interfaces/ITaskSupport.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/knl/Task__epilogue.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/knl/package/Task_SupportProxy.h
-sensors/hdc1000.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/Board.h
+sensors/hdc1000.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/Board.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/Power.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/utils/List.h
 sensors/hdc1000.obj: C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdbool.h
-sensors/hdc1000.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/CC2650STK.h
+sensors/hdc1000.obj: C:/Users/tomi_/Desktop/jtkj-harjoitustyo/CC2650STK.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/PIN.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/driverlib/ioc.h
 sensors/hdc1000.obj: C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/cc26xxware_2_24_03_17272/inc/hw_types.h
@@ -476,7 +476,7 @@ C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbi
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/bios_6_46_01_37/packages/ti/sysbios/knl/package/Task_SupportProxy.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/Board.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo/Board.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/Power.h:
 
@@ -484,7 +484,7 @@ C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_0
 
 C:/ti/ccs1040/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/include/stdbool.h:
 
-C:/Users/tomi_/Desktop/jtkj-harjoitustyo-v2/CC2650STK.h:
+C:/Users/tomi_/Desktop/jtkj-harjoitustyo/CC2650STK.h:
 
 C:/ti/tirtos_cc13xx_cc26xx_2_21_00_06/products/tidrivers_cc13xx_cc26xx_2_21_00_04/packages/ti/drivers/PIN.h:
 

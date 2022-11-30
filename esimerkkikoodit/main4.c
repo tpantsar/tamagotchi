@@ -4,24 +4,24 @@
 #include <stdio.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
+#include <ti/drivers/Power.h>
+#include <ti/drivers/UART.h>
+#include <ti/drivers/pin/PINCC26XX.h>
+#include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/Power.h>
-#include <ti/drivers/power/PowerCC26XX.h>
-#include <ti/drivers/UART.h>
 
 /* Board Header files */
 #include "Board.h"
-#include "wireless/comm_lib.h"
 #include "sensors/opt3001.h"
+#include "wireless/comm_lib.h"
 
 /* Task */
 #define STACKSIZE 2048
@@ -30,8 +30,7 @@ Char uartTaskStack[STACKSIZE];
 
 // JTKJ: Teht�v� 3. Tilakoneen esittely
 // JTKJ: Exercise 3. Definition of the state machine
-enum state
-{
+enum state {
     WAITING = 1,
     DATA_READY
 };
@@ -56,8 +55,7 @@ PIN_Config ledConfig[] = {
     Board_LED1 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
     PIN_TERMINATE};
 
-void buttonFxn(PIN_Handle handle, PIN_Id pinId)
-{
+void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 
     // JTKJ: Teht�v� 1. Vilkuta jompaa kumpaa ledi�
     // JTKJ: Exercise 1. Blink either led of the device
@@ -68,8 +66,7 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId)
 }
 
 /* Task Functions */
-Void uartTaskFxn(UArg arg0, UArg arg1)
-{
+Void uartTaskFxn(UArg arg0, UArg arg1) {
     // JTKJ: Teht�v� 4. Lis�� UARTin alustus: 9600,8n1
     // JTKJ: Exercise 4. Setup here UART connection as 9600,8n1
     // UART-kirjaston asetukset
@@ -90,21 +87,18 @@ Void uartTaskFxn(UArg arg0, UArg arg1)
     uartParams.stopBits = UART_STOP_ONE;   // 1
 
     uart = UART_open(Board_UART0, &uartParams);
-    if (uart == NULL)
-    {
+    if (uart == NULL) {
         System_abort("Error opening the UART");
     }
 
-    while (1)
-    {
+    while (1) {
 
         // JTKJ: Teht�v� 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
         //       Muista tilamuutos
         // JTKJ: Exercise 3. Print out sensor data as string to debug window if the state is correct
         //       Remember to modify state
 
-        if (programState == DATA_READY)
-        {
+        if (programState == DATA_READY) {
             sprintf(echo_msg, "%f\n", ambientLight);
             System_printf(echo_msg);
             programState = WAITING;
@@ -122,8 +116,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-Void sensorTaskFxn(UArg arg0, UArg arg1)
-{
+Void sensorTaskFxn(UArg arg0, UArg arg1) {
     I2C_Handle i2c;
     I2C_Params i2cParams;
 
@@ -135,8 +128,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1)
 
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
 
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
 
@@ -147,8 +139,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1)
     Task_sleep(1000);
     opt3001_setup(&i2c);
 
-    while (1)
-    {
+    while (1) {
         // JTKJ: Teht�v� 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan merkkijonona
         // JTKJ: Exercise 2. Read sensor data and print it to the Debug window as string
         double light = opt3001_get_data(&i2c);
@@ -169,8 +160,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-Int main(void)
-{
+Int main(void) {
 
     // Task variables
     Task_Handle sensorTaskHandle;
@@ -194,21 +184,18 @@ Int main(void)
     //       Remember to register the above interrupt handler for button
     // Ledi k�ytt��n ohjelmassa
     ledHandle = PIN_open(&ledState, ledConfig);
-    if (!ledHandle)
-    {
+    if (!ledHandle) {
         System_abort("Error initializing LED pin\n");
     }
 
     // Painonappi k�ytt��n ohjelmassa
     buttonHandle = PIN_open(&buttonState, buttonConfig);
-    if (!buttonHandle)
-    {
+    if (!buttonHandle) {
         System_abort("Error initializing button pin\n");
     }
 
     // Painonapille keskeytyksen k�sittellij�
-    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0)
-    {
+    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function");
     }
 
@@ -218,8 +205,7 @@ Int main(void)
     sensorTaskParams.stack = &sensorTaskStack;
     sensorTaskParams.priority = 2;
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
-    if (sensorTaskHandle == NULL)
-    {
+    if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -228,8 +214,7 @@ Int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
-    if (uartTaskHandle == NULL)
-    {
+    if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 

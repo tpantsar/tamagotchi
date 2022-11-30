@@ -6,34 +6,34 @@
  */
 
 /* C Standard library */
+#include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
-#include <inttypes.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
+#include <driverlib/timer.h>
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
+#include <ti/drivers/Power.h>
+#include <ti/drivers/UART.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
+#include <ti/drivers/pin/PINCC26XX.h>
+#include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/Power.h>
-#include <ti/drivers/power/PowerCC26XX.h>
-#include <ti/drivers/UART.h>
-#include <ti/drivers/i2c/I2CCC26XX.h>
-#include <driverlib/timer.h>
 
 /* Board Header files */
 #include "Board.h"
-#include "wireless/comm_lib.h"
-#include "sensors/opt3001.h"
 #include "buzzer.h"
 #include "sensors/mpu9250.h"
+#include "sensors/opt3001.h"
 #include "sensors/tmp007.h"
+#include "wireless/comm_lib.h"
 
 void musiikkiFunktioLiikunta(void);
 void musiikkiFunktioEnergia(void);
@@ -47,8 +47,7 @@ char uartTaskStack[STACKSIZE];
 char commTaskStack[STACKSIZE];
 
 // Tilakone
-enum state
-{
+enum state {
     WAITING = 1, // DATA_READ
     DATA_READY,
     RUOKI,
@@ -61,8 +60,7 @@ enum state
 enum state programState = WAITING;
 
 // Sisainen tilakone
-enum tila
-{
+enum tila {
     TILA_0 = 1,
     TILA_PAIKALLAAN,
     TILA_LIIKKUU,
@@ -117,7 +115,7 @@ PIN_Config punainen_ledConfig[] = {
     PIN_TERMINATE};
 
 PIN_Config buzzerConfig[] = {
-    Board_BUZZER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX, /* Buzzer initially off          */
+    Board_BUZZER | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX, /* Buzzer initially off */
     PIN_TERMINATE};
 
 PIN_Config powerButtonConfig[] = {
@@ -128,9 +126,8 @@ PIN_Config powerButtonWakeConfig[] = {
     Board_BUTTON1 | PIN_INPUT_EN | PIN_PULLUP | PINCC26XX_WAKEUP_NEGEDGE,
     PIN_TERMINATE};
 
-void powerFxn(PIN_Handle handle, PIN_Id pinId)
-{
-    // Odotetana hetki ihan varalta..
+void powerFxn(PIN_Handle handle, PIN_Id pinId) {
+    // Odotetaan hetki ihan varalta..
     Task_sleep(100000 / Clock_tickPeriod);
 
     // Taikamenot
@@ -139,18 +136,15 @@ void powerFxn(PIN_Handle handle, PIN_Id pinId)
     Power_shutdown(NULL, 0);
 }
 
-void buttonFxn(PIN_Handle handle, PIN_Id pinId)
-{
+void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     // kun painetaan nappia, tamagotchia ruokitaan
-    if (ravinto < 10)
-    {
+    if (ravinto < 10) {
         ravinto++;
     }
     programState = RUOKI;
 }
 
-void musiikkiFunktioLiikunta(void)
-{
+void musiikkiFunktioLiikunta(void) {
     // kun tamagotchi liikkuu, soi tama musiikki
     buzzerOpen(buzzer);
     buzzerSetFrequency(262); // c
@@ -180,8 +174,7 @@ void musiikkiFunktioLiikunta(void)
     buzzerClose();
 }
 
-void musiikkiFunktioEnergia(void)
-{
+void musiikkiFunktioEnergia(void) {
     // kun tamagotchi nukkuu soi tama musiikki
     buzzerOpen(buzzer);
     buzzerSetFrequency(262); // c
@@ -213,8 +206,7 @@ void musiikkiFunktioEnergia(void)
     buzzerClose();
 }
 
-void musiikkiFunktioVaroitus(void)
-{
+void musiikkiFunktioVaroitus(void) {
     // kun jokin arvo on alle 2, tamagotchi lahettaa taman varoitus aanen
     buzzerOpen(buzzer);
     buzzerSetFrequency(277);
@@ -224,8 +216,7 @@ void musiikkiFunktioVaroitus(void)
     buzzerClose();
 }
 
-void musiikkiFunktioAktivointi(void)
-{
+void musiikkiFunktioAktivointi(void) {
     // kun tamagotchia aktivoidaan soi tama musiikki
     buzzerOpen(buzzer);
     buzzerSetFrequency(494); // h
@@ -266,29 +257,24 @@ void musiikkiFunktioAktivointi(void)
 }
 
 /* Task Functions */
-void uartTaskFxn(UArg arg0, UArg arg1)
-{
+void uartTaskFxn(UArg arg0, UArg arg1) {
     Task_sleep(100000 / Clock_tickPeriod);
     char viesti[8];
 
-    while (1)
-    {
+    while (1) {
         System_printf("uartTask\n");
         System_flush();
 
-        if (programState == DATA_READY)
-        {
+        if (programState == DATA_READY) {
             programState = WAITING;
         }
 
-        else if (programState == WAITING)
-        {
+        else if (programState == WAITING) {
             programState = WAITING;
         }
 
         // Syöminen (toimii painonapilla)
-        else if (programState == RUOKI)
-        {
+        else if (programState == RUOKI) {
             sprintf(viesti, "%s", "ping");
             Send6LoWPAN(IEEE80154_SERVER_ADDR, viesti, strlen(viesti));
             StartReceive6LoWPAN();
@@ -298,36 +284,31 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         }
 
         // Nukkuminen
-        else if (programState == ENERGIA_TILA)
-        {
+        else if (programState == ENERGIA_TILA) {
             programState = WAITING;
         }
 
         // Leikkiminen
-        else if (programState == LEIKKI)
-        {
+        else if (programState == LEIKKI) {
             programState = WAITING;
         }
 
         // Aktivointi
-        else if (programState == AKTIVOINTI_TILA)
-        {
+        else if (programState == AKTIVOINTI_TILA) {
             System_printf("Aktivointitilassa whilessa\n");
             System_flush();
             programState = WAITING;
         }
 
         // Karkaaminen
-        else if (programState == KARKAAMINEN)
-        {
+        else if (programState == KARKAAMINEN) {
             // Molemmat ledit päälle
             PIN_setOutputValue(punainen_ledHandle, Board_LED1, 1);
             PIN_setOutputValue(ledHandle, Board_LED0, 1);
         }
 
         // Hoiva
-        else if (programState == HOIVA_TILA)
-        {
+        else if (programState == HOIVA_TILA) {
             // Punainen ledi päälle
             PIN_setOutputValue(punainen_ledHandle, Board_LED1, 1);
             programState = WAITING;
@@ -338,8 +319,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-void sensorTaskFxn(UArg arg0, UArg arg1)
-{
+void sensorTaskFxn(UArg arg0, UArg arg1) {
     // valosensori
     I2C_Handle i2c;
     I2C_Params i2cParams;
@@ -377,8 +357,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // MPU open i2c
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-    if (i2cMPU == NULL)
-    {
+    if (i2cMPU == NULL) {
         System_abort("Error Initializing I2CMPU\n");
     }
 
@@ -394,8 +373,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // valosensorin i2c vaylan avaus
     i2c = I2C_open(Board_I2C, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
 
@@ -409,8 +387,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // lampotilasensorin i2c vaylan avaus
     i2c = I2C_open(Board_I2C, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
 
@@ -422,14 +399,12 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     System_flush();
     I2C_close(i2c);
 
-    while (1)
-    {
+    while (1) {
         sprintf(merkkijono_programState, "programState: %d\n", programState);
         System_printf(merkkijono_programState);
         System_flush();
 
-        if (programState == WAITING)
-        {
+        if (programState == WAITING) {
             PIN_setOutputValue(punainen_ledHandle, Board_LED1, 0);
             PIN_setOutputValue(ledHandle, Board_LED0, 0);
 
@@ -475,26 +450,22 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             programState = DATA_READY;
         }
 
-        if (programState == DATA_READY)
-        {
+        if (programState == DATA_READY) {
             sisainenState = TILA_0;
         }
 
         // sensorTag on liikkeessä
-        if (sisainenState == TILA_0 && ax < -0.5)
-        {
+        if (sisainenState == TILA_0 && ax < -0.5) {
             sisainenState = TILA_LIIKKUU;
         }
 
         // sensorTag on paikallaan
-        if ((sisainenState == TILA_0) && (ax < 5) && (ay < 10) && (az < 5))
-        {
+        if ((sisainenState == TILA_0) && (ax < 5) && (ay < 10) && (az < 5)) {
             sisainenState = TILA_PAIKALLAAN;
         }
 
         // Leikkiminen
-        if (sisainenState == TILA_LIIKKUU && liikunta < 10)
-        {
+        if (sisainenState == TILA_LIIKKUU && liikunta < 10) {
             liikunta++;
             sprintf(merkkijono_liikunta, "liikuntaa: %d\n", liikunta);
             System_printf(merkkijono_liikunta);
@@ -504,20 +475,17 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
         }
 
         // sensorTag on pimeässä
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 15)
-        {
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 15) {
             sisainenState = TILA_PIMEA;
         }
 
         // sensorTag on valoisassa
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight > 100)
-        {
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight > 100) {
             sisainenState = TILA_VALO;
         }
 
         // Nukkuminen (liikesensori + valosensori)
-        if (sisainenState == TILA_PIMEA && energia < 10)
-        {
+        if (sisainenState == TILA_PIMEA && energia < 10) {
             energia++;
             System_printf("asetetaan energiatila\n");
             sprintf(merkkijono_energia, "energia: %d\n", energia);
@@ -528,59 +496,50 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             sisainenState = TILA_0;
         }
 
-        // Aktivointi
-        if (sisainenState == TILA_VALO && aktivoi < 10)
-        {
-            musiikkiFunktioAktivointi();
-            System_printf("aktivointitila\n");
-            System_flush();
-
-            if (hoiva < 10)
-            {
-                hoiva++;
-            }
-
-            if (ravinto < 10)
-            {
-                ravinto++;
-            }
-
-            if (liikunta < 10)
-            {
-                liikunta++;
-            }
-
-            programState = AKTIVOINTI_TILA;
-        }
-
-        // Varoitus
-        if (energia == 2 || ravinto == 2 || hoiva == 2 || liikunta == 2)
-        {
-            musiikkiFunktioVaroitus();
-            sisainenState = TILA_0;
-        }
-
-        // Karkaaminen
-        if (energia == 0 || ravinto == 0 || hoiva == 0 || liikunta == 0)
-        {
-            programState = KARKAAMINEN;
-            sisainenState = TILA_0;
-        }
-
         // sensorTag on lämpimässä
-        if (sisainenState == TILA_PAIKALLAAN && lampotila > 35.0)
-        {
+        if (sisainenState == TILA_PAIKALLAAN && lampotila > 35.0) {
             sisainenState = TILA_LAMPO;
         }
 
         // Hoiva
-        if (sisainenState == TILA_LAMPO && hoiva < 10)
-        {
+        if (sisainenState == TILA_LAMPO && hoiva < 10) {
             hoiva++;
             sprintf(merkkijono_hoiva, "hoiva: %d\n", hoiva);
             System_printf(merkkijono_hoiva);
             System_flush();
             programState = HOIVA_TILA;
+        }
+
+        // Aktivointi
+        if (sisainenState == TILA_VALO && aktivoi < 10) {
+            musiikkiFunktioAktivointi();
+            System_printf("aktivointitila\n");
+            System_flush();
+
+            if (hoiva < 10) {
+                hoiva++;
+            }
+
+            if (ravinto < 10) {
+                ravinto++;
+            }
+
+            if (liikunta < 10) {
+                liikunta++;
+            }
+            programState = AKTIVOINTI_TILA;
+        }
+
+        // Varoitus
+        if (energia == 2 || ravinto == 2 || hoiva == 2 || liikunta == 2) {
+            musiikkiFunktioVaroitus();
+            sisainenState = TILA_0;
+        }
+
+        // Karkaaminen
+        if (energia == 0 || ravinto == 0 || hoiva == 0 || liikunta == 0) {
+            programState = KARKAAMINEN;
+            sisainenState = TILA_0;
         }
 
         printf("\nlampotila: %.2lf\n", lampotila);
@@ -597,24 +556,20 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     PIN_setOutputValue(hMpuPin, Board_MPU_POWER, Board_MPU_POWER_OFF);
 }
 
-void commTask(UArg arg0, UArg arg1)
-{
+void commTask(UArg arg0, UArg arg1) {
     char payload[16]; // viestipuskuri
     uint16_t senderAddr;
 
     // Radio alustetaan vastaanottotilaan
     int32_t result = StartReceive6LoWPAN();
-    if (result != true)
-    {
+    if (result != true) {
         System_abort("Wireless receive start failed");
     }
 
     // Vastaanotetaan viestejä loopissa
-    while (true)
-    {
+    while (true) {
         // jos true, viesti odottaa
-        if (GetRXFlag())
-        {
+        if (GetRXFlag()) {
             // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
             memset(payload, 0, 16);
             // Luetaan viesti puskuriin payload
@@ -626,8 +581,7 @@ void commTask(UArg arg0, UArg arg1)
     }
 }
 
-int main(void)
-{
+int main(void) {
     // Task variables
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
@@ -644,43 +598,36 @@ int main(void)
     Board_initI2C();
 
     hMpuPin = PIN_open(&MpuPinState, MpuPinConfig);
-    if (hMpuPin == NULL)
-    {
+    if (hMpuPin == NULL) {
         System_abort("Pin open failed!");
     }
 
     // otetaan painonappi ja led kayttoon
     ledHandle = PIN_open(&ledState, ledConfig);
-    if (!ledHandle)
-    {
+    if (!ledHandle) {
         System_abort("Error initializing Led pin\n");
     }
 
     buttonHandle = PIN_open(&buttonState, buttonConfig);
-    if (!buttonHandle)
-    {
+    if (!buttonHandle) {
         System_abort("Error initializing button pin\n");
     }
 
     // virtakytkimen kayttoonotto
     powerButtonHandle = PIN_open(&powerButtonState, powerButtonConfig);
-    if (!powerButtonHandle)
-    {
+    if (!powerButtonHandle) {
         System_abort("Error initializing power button\n");
     }
-    if (PIN_registerIntCb(powerButtonHandle, &powerFxn) != 0)
-    {
+    if (PIN_registerIntCb(powerButtonHandle, &powerFxn) != 0) {
         System_abort("Error registering power button callback");
     }
 
-    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0)
-    {
+    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function\n");
     }
 
     buzzer = PIN_open(&buzzerState, buzzerConfig);
-    if (buzzer == NULL)
-    {
+    if (buzzer == NULL) {
         System_abort("Pin open failed!");
     }
 
@@ -690,8 +637,7 @@ int main(void)
     sensorTaskParams.stack = &sensorTaskStack;
     sensorTaskParams.priority = 2;
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
-    if (sensorTaskHandle == NULL)
-    {
+    if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -700,8 +646,7 @@ int main(void)
     commTaskParams.stack = &commTaskStack;
     commTaskParams.priority = 1;
     commTaskHandle = Task_create(commTask, &commTaskParams, NULL);
-    if (commTaskHandle == NULL)
-    {
+    if (commTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -710,8 +655,7 @@ int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
-    if (uartTaskHandle == NULL)
-    {
+    if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 

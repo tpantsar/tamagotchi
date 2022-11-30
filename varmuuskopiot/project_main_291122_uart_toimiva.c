@@ -136,19 +136,6 @@ PIN_Config buzzerConfig[] = {
 
 /* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
-
-    System_printf("\nEAT\n"); // Debug
-    /*char debug[30];
-    sprintf(debug, "button: %s\n", handle);
-    System_printf(debug);
-    System_flush();
-
-    while (handle)
-    {
-        printf("\nnappi pohjassa");
-    }*/
-
-    /*
     if (ravinto < 10) {
         ravinto++;
         System_printf("\nEAT\n"); // Debug
@@ -157,7 +144,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
         System_printf("\nMaha taynna!\n"); // Debug
         System_flush();
     }
-    */
     programState = EAT;
 }
 
@@ -227,7 +213,6 @@ void buzzerGameOver(void) {
 
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1) {
-
     Task_sleep(100000 / Clock_tickPeriod);
     char echo_msg[50];
 
@@ -312,7 +297,7 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // Taski nukkumaan
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(2000000 / Clock_tickPeriod);
     }
 }
 
@@ -431,7 +416,8 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // EXERCISE
-        if (sisainenState == TILA_LIIKKUU) {
+        if (sisainenState == TILA_LIIKKUU && liikunta < 10) {
+            liikunta++;
             sprintf(debug_msg, "%s", "\nEXERCISE");
             System_printf(debug_msg);
             System_flush();
@@ -440,7 +426,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // sensorTag on pimeässä
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 5) {
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 15) {
             sisainenState = TILA_PIMEA;
         }
 
@@ -450,7 +436,8 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // PET
-        if (sisainenState == TILA_PIMEA) {
+        if (sisainenState == TILA_PIMEA && hoiva < 10) {
+            hoiva++;
             sprintf(debug_msg, "%s", "\nPET");
             System_printf(debug_msg);
             System_flush();
@@ -464,7 +451,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             sprintf(debug_msg, "%s", "\nACTIVATE");
             System_printf(debug_msg);
             System_flush();
-            /*
             if (ravinto < 10) {
                 ravinto++;
             }
@@ -474,7 +460,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             if (liikunta < 10) {
                 liikunta++;
             }
-            */
             programState = ACTIVATE;
         }
 
@@ -509,7 +494,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         debugFxn();
 
         // Taski nukkumaan
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(2000000 / Clock_tickPeriod);
     }
     // PIN_setOutputValue(MpuPinHandle, Board_MPU_POWER, Board_MPU_POWER_OFF);
 }
@@ -519,6 +504,47 @@ void debugFxn(void) {
     System_printf("\nravinto: %d", ravinto);
     System_printf("\nhoiva: %d", hoiva);
     System_printf("\nliikunta: %d", liikunta);
+}
+
+// Taskifunktio
+void serialTask(UArg arg0, UArg arg1) {
+
+    char input;
+    char echo_msg[30];
+
+    // UART-kirjaston asetukset
+    UART_Handle uart;
+    UART_Params uartParams;
+
+    // Alustetaan sarjaliikenne
+    UART_Params_init(&uartParams);
+    uartParams.writeDataMode = UART_DATA_TEXT;
+    uartParams.readDataMode = UART_DATA_TEXT;
+    uartParams.readEcho = UART_ECHO_OFF;
+    uartParams.readMode = UART_MODE_BLOCKING;
+    uartParams.baudRate = 9600;            // nopeus 9600baud
+    uartParams.dataLength = UART_LEN_8;    // 8
+    uartParams.parityType = UART_PAR_NONE; // n
+    uartParams.stopBits = UART_STOP_ONE;   // 1
+
+    // Avataan yhteys laitteen sarjaporttiin vakiossa Board_UART0
+    uart = UART_open(Board_UART0, &uartParams);
+    if (uart == NULL) {
+        System_abort("Error opening the UART");
+    }
+
+    // Ikuinen elämä
+    while (1) {
+        // Vastaanotetaan 1 merkki kerrallaan input-muuttujaan
+        UART_read(uart, &input, 1);
+
+        // Lähetetään merkkijono takaisin
+        sprintf(echo_msg, "Received: %c\n", input);
+        UART_write(uart, echo_msg, strlen(echo_msg));
+
+        // Kohteliaasti nukkumaan sekunniksi
+        Task_sleep(1000000L / Clock_tickPeriod);
+    }
 }
 
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len) {

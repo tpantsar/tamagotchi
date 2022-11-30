@@ -10,32 +10,32 @@ Tekijät:
 // Otsikkotiedostot alla
 
 /* C Standard library */
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
+#include <ti/drivers/Power.h>
+#include <ti/drivers/UART.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
+#include <ti/drivers/pin/PINCC26XX.h>
+#include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/i2c/I2CCC26XX.h>
-#include <ti/drivers/Power.h>
-#include <ti/drivers/power/PowerCC26XX.h>
-#include <ti/drivers/UART.h>
 
 /* Board Header files */
 #include "Board.h"
-#include "wireless/comm_lib.h"
-#include "sensors/opt3001.h"
-#include "sensors/mpu9250.h"
 #include "buzzer.h"
+#include "sensors/mpu9250.h"
+#include "sensors/opt3001.h"
+#include "wireless/comm_lib.h"
 
 // Itse koodi alkaa
 
@@ -49,8 +49,7 @@ Char msgTaskStack[STACKSIZE];
 
 /* Other Variables */
 
-enum state
-{
+enum state {
     WAITING = 1,
     READ_SENSOR,
     ANALYZE_DATA,
@@ -59,8 +58,7 @@ enum state
 };
 enum state programState = WAITING;
 
-typedef struct AccelData
-{
+typedef struct AccelData {
     float x;
     float y;
     float z;
@@ -68,8 +66,7 @@ typedef struct AccelData
 
 #define SENSORDATAPOINTS 10
 
-enum comType
-{
+enum comType {
     COMTYPE_UART = 1,
     COMTYPE_LOWPAN
 };
@@ -134,8 +131,7 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
     .pinSCL = Board_I2C0_SCL1};
 
 // SFX muuttujat
-enum toneType
-{
+enum toneType {
     STATIC = 1,
     RISING,
     FALLING
@@ -149,9 +145,8 @@ int buzzerFrequency;
 
 /* Non-Task Functions */
 
-//Äänet ja niihin liittyvä
-void playTone(int frequency, int duration, enum toneType type, int pitchModifier, int timeModifier)
-{
+// Äänet ja niihin liittyvä
+void playTone(int frequency, int duration, enum toneType type, int pitchModifier, int timeModifier) {
     currentType = type;
     currentPitchModifierValue = pitchModifier;
     currentTimeModifierValue = timeModifier;
@@ -162,8 +157,7 @@ void playTone(int frequency, int duration, enum toneType type, int pitchModifier
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(buzzerFrequency);
 
-    switch (currentType)
-    {
+    switch (currentType) {
 
     case STATIC:
         Clock_setTimeout(buzzerClkHandle, buzzerDuration);
@@ -184,12 +178,9 @@ void playTone(int frequency, int duration, enum toneType type, int pitchModifier
     Clock_start(buzzerClkHandle);
 }
 
-void buzzerClockFxn(UArg arg0)
-{
-    if (Clock_getTicks() < buzzerStartTime + (buzzerDuration))
-    {
-        switch (currentType)
-        {
+void buzzerClockFxn(UArg arg0) {
+    if (Clock_getTicks() < buzzerStartTime + (buzzerDuration)) {
+        switch (currentType) {
 
         case STATIC:
             buzzerClose();
@@ -214,24 +205,18 @@ void buzzerClockFxn(UArg arg0)
             buzzerClose();
             Clock_stop(buzzerClkHandle);
         }
-    }
-    else
-    {
+    } else {
         buzzerClose();
     }
 }
 
-void button1Fxn(PIN_Handle handle, PIN_Id pinId)
-{
-    if (COMTYPE == COMTYPE_UART)
-    {
+void button1Fxn(PIN_Handle handle, PIN_Id pinId) {
+    if (COMTYPE == COMTYPE_UART) {
         COMTYPE = COMTYPE_LOWPAN;
         playTone(600, 250000 / Clock_tickPeriod, STATIC, 0, 0);
         System_printf("Switched communication type to 6LoWPAN\n");
         System_flush();
-    }
-    else
-    {
+    } else {
         COMTYPE = COMTYPE_UART;
         playTone(400, 250000 / Clock_tickPeriod, STATIC, 0, 0);
         System_printf("Switched communication type to uart\n");
@@ -239,8 +224,7 @@ void button1Fxn(PIN_Handle handle, PIN_Id pinId)
     }
 }
 
-void powerFxn(PIN_Handle handle, PIN_Id pinId)
-{
+void powerFxn(PIN_Handle handle, PIN_Id pinId) {
     System_printf("Going to sleep\n");
     System_flush();
 
@@ -253,43 +237,35 @@ void powerFxn(PIN_Handle handle, PIN_Id pinId)
     Power_shutdown(0, 0);
 }
 
-void clkFxn(UArg arg0)
-{
-    if (programState == WAITING)
-    {
+void clkFxn(UArg arg0) {
+    if (programState == WAITING) {
         programState = READ_SENSOR;
     }
 }
 
-void uartReadFxn(UART_Handle handle, void *rxBuf, size_t len)
-{
+void uartReadFxn(UART_Handle handle, void *rxBuf, size_t len) {
     programState = ANALYZE_MSG;
     UART_read(handle, rxBuf, 80);
 }
 
 // Tamagotchin tila
-void analyzeMsg()
-{
-    if (strstr(readBuffer, "Food") != NULL)
-    {
+void analyzeMsg() {
+    if (strstr(readBuffer, "Food") != NULL) {
         playTone(20, 500000 / Clock_tickPeriod, STATIC, 0, 0);
         System_printf("PERKELE ETTÄ ON NÄLÄKÄ!\n"); // Alunperin tarkistukseen, mutta sitten saatiinkin nerokas idea...
         System_flush();
     }
-    if (strstr(readBuffer, "Scratch") != NULL)
-    {
+    if (strstr(readBuffer, "Scratch") != NULL) {
         playTone(1000, 500000 / Clock_tickPeriod, FALLING, 250, 250000 / Clock_tickPeriod);
         System_printf("FUCKING HELL\n"); // Alunperin tarkistukseen, mutta sitten saatiinkin nerokas idea...
         System_flush();
     }
-    if (strstr(readBuffer, "Severe") != NULL)
-    {
+    if (strstr(readBuffer, "Severe") != NULL) {
         playTone(300, 1000000 / Clock_tickPeriod, FALLING, 100, 500000 / Clock_tickPeriod);
         System_printf("FAT AS HELL\n"); // Alunperin tarkistukseen, mutta sitten saatiinkin nerokas idea...
         System_flush();
     }
-    if (strstr(readBuffer, "Too late") != NULL)
-    {
+    if (strstr(readBuffer, "Too late") != NULL) {
         playTone(600, 1250000 / Clock_tickPeriod, FALLING, 100, 250000 / Clock_tickPeriod);
         System_printf("RIP\n"); // Alunperin tarkistukseen, mutta sitten saatiinkin nerokas idea...
         System_flush();
@@ -297,8 +273,7 @@ void analyzeMsg()
 }
 
 /* Task Functions */
-void uartTaskFxn(UArg arg0, UArg arg1)
-{
+void uartTaskFxn(UArg arg0, UArg arg1) {
 
     // UART-kirjaston asetukset
     UART_Handle uart;
@@ -321,8 +296,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
     // Avataan yhteys laitteen sarjaporttiin vakiossa Board_UART0
     uart = UART_open(Board_UART0, &uartParams);
-    if (uart == NULL)
-    {
+    if (uart == NULL) {
         System_abort("Error opening the UART");
     }
 
@@ -331,20 +305,16 @@ void uartTaskFxn(UArg arg0, UArg arg1)
     System_printf("Opened uart\n");
     System_flush();
 
-    while (1)
-    {
-        if (programState == SEND_MSG)
-        {
+    while (1) {
+        if (programState == SEND_MSG) {
             char final_msg[30];
             sprintf(final_msg, "id:236,%s\0", writeMsg);
             /*System_printf("Sending message: %s\n", final_msg);
             System_flush();*/
-            if (COMTYPE == COMTYPE_UART)
-            {
+            if (COMTYPE == COMTYPE_UART) {
                 UART_write(uart, final_msg, strlen(final_msg) + 1);
             }
-            if (COMTYPE == COMTYPE_LOWPAN)
-            {
+            if (COMTYPE == COMTYPE_LOWPAN) {
                 Send6LoWPAN(IEEE80154_SERVER_ADDR, final_msg, strlen(final_msg));
                 StartReceive6LoWPAN();
             }
@@ -355,39 +325,28 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         Task_sleep(100000 / Clock_tickPeriod);
     }
 }
-void lowpanReadFxn(UArg arg0, UArg arg1)
-{
+void lowpanReadFxn(UArg arg0, UArg arg1) {
     uint16_t senderAddr;
     int32_t result = StartReceive6LoWPAN();
-    if (result != true)
-    {
+    if (result != true) {
         System_abort("Wireless receive start failed");
     }
-    while (1)
-    {
-        if (GetRXFlag() && COMTYPE == COMTYPE_LOWPAN)
-        {
+    while (1) {
+        if (GetRXFlag() && COMTYPE == COMTYPE_LOWPAN) {
             memset(readBuffer, 0, 80); // Empty the read buffer
             Receive6LoWPAN(&senderAddr, readBuffer, 80);
-            if (senderAddr == IEEE80154_SERVER_ADDR)
-            { // If the message was received from the correct address, save the message and analyze it for relevant information
+            if (senderAddr == IEEE80154_SERVER_ADDR) { // If the message was received from the correct address, save the message and analyze it for relevant information
                 programState = ANALYZE_MSG;
             }
         }
     }
 }
-void msgTaskFxn(UArg arg0, UArg arg1)
-{
-    while (1)
-    {
-        if (programState == ANALYZE_MSG)
-        {
-            if (COMTYPE == COMTYPE_UART && strstr(readBuffer, "236") != NULL)
-            {
+void msgTaskFxn(UArg arg0, UArg arg1) {
+    while (1) {
+        if (programState == ANALYZE_MSG) {
+            if (COMTYPE == COMTYPE_UART && strstr(readBuffer, "236") != NULL) {
                 analyzeMsg();
-            }
-            else if (COMTYPE == COMTYPE_LOWPAN)
-            {
+            } else if (COMTYPE == COMTYPE_LOWPAN) {
                 analyzeMsg();
             }
             memset(readBuffer, 0, strlen(readBuffer));
@@ -397,8 +356,7 @@ void msgTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-void sensorTaskFxn(UArg arg0, UArg arg1)
-{
+void sensorTaskFxn(UArg arg0, UArg arg1) {
 
     // MPU9250 käyttöönotto
 
@@ -422,8 +380,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // MPU avaa i2c
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-    if (i2cMPU == NULL)
-    {
+    if (i2cMPU == NULL) {
         System_abort("Error Initializing I2CMPU\n");
     }
 
@@ -440,20 +397,15 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // TASK LOOPPI
 
-    while (1)
-    {
+    while (1) {
 
-        if (programState == READ_SENSOR)
-        {
+        if (programState == READ_SENSOR) {
 
             mpu9250_get_data(&i2cMPU, &ax, &ay, &az, &gx, &gy, &gz);
 
-            if (latestIndex <= 0)
-            {
+            if (latestIndex <= 0) {
                 latestIndex = SENSORDATAPOINTS - 1;
-            }
-            else
-            {
+            } else {
                 latestIndex--;
             }
 
@@ -470,35 +422,25 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     I2C_close(i2cMPU);
 }
 
-void analyzeTaskFxn(UArg arg0, UArg arg1)
-{
+void analyzeTaskFxn(UArg arg0, UArg arg1) {
 
-    while (1)
-    {
+    while (1) {
 
         char messageCoolDown = 0;
-        if (programState == ANALYZE_DATA)
-        {
+        if (programState == ANALYZE_DATA) {
             if (acs(accelData[latestIndex].x) > 0.5f) // Haluaa liikettä
             {
-                if (acs(accelData[latestIndex].x - accelData[(latestIndex + 1) % SENSORDATAPOINTS].x) > 0.7f || acs(accelData[(latestIndex + 1) % SENSORDATAPOINTS].x - accelData[(latestIndex + 2) % SENSORDATAPOINTS].x) > 0.7f)
-                {
-                    if (acs(accelData[(latestIndex + 2) % SENSORDATAPOINTS].x - accelData[(latestIndex + 3) % SENSORDATAPOINTS].x) > 0.7f || acs(accelData[(latestIndex + 3) % SENSORDATAPOINTS].x - accelData[(latestIndex + 4) % SENSORDATAPOINTS].x) > 0.7f)
-                    {
+                if (acs(accelData[latestIndex].x - accelData[(latestIndex + 1) % SENSORDATAPOINTS].x) > 0.7f || acs(accelData[(latestIndex + 1) % SENSORDATAPOINTS].x - accelData[(latestIndex + 2) % SENSORDATAPOINTS].x) > 0.7f) {
+                    if (acs(accelData[(latestIndex + 2) % SENSORDATAPOINTS].x - accelData[(latestIndex + 3) % SENSORDATAPOINTS].x) > 0.7f || acs(accelData[(latestIndex + 3) % SENSORDATAPOINTS].x - accelData[(latestIndex + 4) % SENSORDATAPOINTS].x) > 0.7f) {
                         messageCoolDown = 1;
                         strcpy(writeMsg, "EXERCISE:1");
                     }
                 }
-            }
-            else if (acs(accelData[(latestIndex + 1) % SENSORDATAPOINTS].y) > 0.7f)
-            {
+            } else if (acs(accelData[(latestIndex + 1) % SENSORDATAPOINTS].y) > 0.7f) {
                 messageCoolDown = 1;
                 strcpy(writeMsg, "EAT:1");
-            }
-            else if (acs(accelData[(latestIndex + 3) % SENSORDATAPOINTS].z + 1.0f) > 0.7f)
-            {
-                if (acs(accelData[(latestIndex + 4) % SENSORDATAPOINTS].z + 1.0f) < 0.6f || acs(accelData[(latestIndex + 5) % SENSORDATAPOINTS].z + 1.0f) < 0.6f)
-                {
+            } else if (acs(accelData[(latestIndex + 3) % SENSORDATAPOINTS].z + 1.0f) > 0.7f) {
+                if (acs(accelData[(latestIndex + 4) % SENSORDATAPOINTS].z + 1.0f) < 0.6f || acs(accelData[(latestIndex + 5) % SENSORDATAPOINTS].z + 1.0f) < 0.6f) {
                     messageCoolDown = 1;
                     strcpy(writeMsg, "PET:1");
                 }
@@ -506,12 +448,9 @@ void analyzeTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
         }
 
-        if (messageCoolDown == 0)
-        {
+        if (messageCoolDown == 0) {
             Task_sleep(100000 / Clock_tickPeriod);
-        }
-        else
-        {
+        } else {
             programState = SEND_MSG;
             playTone(750, 250000 / Clock_tickPeriod, RISING, 250, 125000 / Clock_tickPeriod);
             Task_sleep(1000000 / Clock_tickPeriod);
@@ -521,8 +460,7 @@ void analyzeTaskFxn(UArg arg0, UArg arg1)
 
 /* Main Function */
 
-int main(void)
-{
+int main(void) {
 
     // Task variables
     Task_Handle sensorTaskHandle;
@@ -555,32 +493,27 @@ int main(void)
 
     // Open power button pin
     powerButtonHandle = PIN_open(&powerButtonState, powerButtonConfig);
-    if (!powerButtonHandle)
-    {
+    if (!powerButtonHandle) {
         System_abort("Error initializing power button\n");
     }
-    if (PIN_registerIntCb(powerButtonHandle, &powerFxn) != 0)
-    {
+    if (PIN_registerIntCb(powerButtonHandle, &powerFxn) != 0) {
         System_abort("Error registering power button callback");
     }
 
     buzzerHandle = PIN_open(&buzzerState, buzzerConfig);
-    if (!buzzerHandle)
-    {
+    if (!buzzerHandle) {
         System_abort("Error initializing buzzer pins\n");
     }
 
     // Open the pins
     buttonHandle = PIN_open(&buttonState, buttonConfig);
-    if (!buttonHandle)
-    {
+    if (!buttonHandle) {
         System_abort("Error initializing button pins\n");
     }
 
     // Painonappi aborttia varten
     // funktio button1Fxn
-    if (PIN_registerIntCb(buttonHandle, &button1Fxn) != 0)
-    {
+    if (PIN_registerIntCb(buttonHandle, &button1Fxn) != 0) {
         System_abort("Error registering button callback function");
     }
 
@@ -590,8 +523,7 @@ int main(void)
     sensorTaskParams.stack = &sensorTaskStack;
     sensorTaskParams.priority = 2;
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
-    if (sensorTaskHandle == NULL)
-    {
+    if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -600,8 +532,7 @@ int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
-    if (uartTaskHandle == NULL)
-    {
+    if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -610,8 +541,7 @@ int main(void)
     analyzeTaskParams.stack = &analyzeTaskStack;
     analyzeTaskParams.priority = 2;
     analyzeTaskHandle = Task_create(analyzeTaskFxn, &analyzeTaskParams, NULL);
-    if (analyzeTaskHandle == NULL)
-    {
+    if (analyzeTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -620,8 +550,7 @@ int main(void)
     commTaskParams.stack = &commTaskStack;
     commTaskParams.priority = 1;
     commTaskHandle = Task_create(lowpanReadFxn, &commTaskParams, NULL);
-    if (commTaskHandle == NULL)
-    {
+    if (commTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -630,8 +559,7 @@ int main(void)
     msgTaskParams.stack = &msgTaskStack;
     msgTaskParams.priority = 2;
     msgTaskHandle = Task_create(msgTaskFxn, &msgTaskParams, NULL);
-    if (msgTaskHandle == NULL)
-    {
+    if (msgTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -641,8 +569,7 @@ int main(void)
     clkParams.startFlag = TRUE;
 
     clkHandle = Clock_create((Clock_FuncPtr)clkFxn, 500000 / Clock_tickPeriod, &clkParams, NULL);
-    if (clkHandle == NULL)
-    {
+    if (clkHandle == NULL) {
         System_abort("Clock create failed");
     }
 
@@ -651,8 +578,7 @@ int main(void)
     buzzerClkParams.startFlag = false;
 
     buzzerClkHandle = Clock_create((Clock_FuncPtr)buzzerClockFxn, 0, &buzzerClkParams, NULL);
-    if (buzzerClkHandle == NULL)
-    {
+    if (buzzerClkHandle == NULL) {
         System_abort("Clock create failed");
     }
 

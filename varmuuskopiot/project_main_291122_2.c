@@ -39,14 +39,13 @@
 #include "sensors/tmp007.h"
 #include "wireless/comm_lib.h"
 
-void sendMsg(UART_Handle handle, char *msg, int length);
-
 // Merkkijonot taustajärjestelmää varten
-char msgEat[25] = "id:2230,EAT:2";
-char msgPet[25] = "id:2230,PET:2";
-char msgExercise[25] = "id:2230,EXERCISE:2";
+char msgEat[20] = "id:2230,EAT:2";
+char msgPet[20] = "id:2230,PET:2";
+char msgExercise[20] = "id:2230,EXERCISE:2";
 char msgActivate[25] = "id:2230,ACTIVATE:2;2;2";
-char msgWarning[45] = "id:2230,MSG1:Warning!";
+char msgWarning[45] = "id:2230,MSG1:Warning!,MSG2:Do something";
+char msgWarningRadio[25] = "id:2230,MSG1:Warning!";
 char msgGameOver[25] = "id:2230,MSG1:Game Over!";
 
 #define RXBUFLEN 80
@@ -55,10 +54,7 @@ char msgGameOver[25] = "id:2230,MSG1:Game Over!";
 #define STACKSIZE 4096
 char sensorTaskStack[STACKSIZE];
 char uartTaskStack[STACKSIZE];
-
-uint8_t buffCount = 0;
-char uartStr[RXBUFLEN];  // MSG1 taustajarjestelmasta
-char uartStr2[RXBUFLEN]; // MSG2 taustajarjestelmasta
+char commTaskStack[STACKSIZE];
 
 // Tilakone Tamagotchin toiminnoille
 enum state {
@@ -136,19 +132,6 @@ PIN_Config buzzerConfig[] = {
 
 /* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
-
-    System_printf("\nEAT\n"); // Debug
-    /*char debug[30];
-    sprintf(debug, "button: %s\n", handle);
-    System_printf(debug);
-    System_flush();
-
-    while (handle)
-    {
-        printf("\nnappi pohjassa");
-    }*/
-
-    /*
     if (ravinto < 10) {
         ravinto++;
         System_printf("\nEAT\n"); // Debug
@@ -157,7 +140,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
         System_printf("\nMaha taynna!\n"); // Debug
         System_flush();
     }
-    */
     programState = EAT;
 }
 
@@ -225,12 +207,27 @@ void buzzerGameOver(void) {
     */
 }
 
+/* Viestitys radion kautta
+void messageFxn(char *msg, int length) {
+    if (msg == NULL) {
+        return;
+    }
+
+    char message[50];
+    sprintf(message, "\n%s\n", msg);
+    System_printf(message);
+    System_flush();
+
+    Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t *)msg, length);
+    StartReceive6LoWPAN();
+}*/
+
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1) {
-
     Task_sleep(100000 / Clock_tickPeriod);
     char echo_msg[50];
 
+    // UART-kirjaston asetukset
     UART_Handle uart;
     UART_Params uartParams;
 
@@ -240,7 +237,6 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
     uartParams.readDataMode = UART_DATA_TEXT;
     uartParams.readEcho = UART_ECHO_OFF;
     uartParams.readMode = UART_MODE_BLOCKING;
-    // uartParams.readCallback = &uartFxn;
     uartParams.baudRate = 9600;            // nopeus 9600 baud
     uartParams.dataLength = UART_LEN_8;    // 8
     uartParams.parityType = UART_PAR_NONE; // n
@@ -251,6 +247,15 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
     if (uart == NULL) {
         System_abort("Error opening the UART");
     }
+
+    /*
+    char input[30];
+    UART_read(uart, &input, 1);
+
+    // Lähetetään merkkijono takaisin
+    sprintf(echo_msg, "uartTask: %lf luksia\n\r", ambientLight);
+    UART_write(uart, echo_msg, strlen(echo_msg));
+    */
 
     while (1) {
         // System_printf("\nuartTask\n");
@@ -266,7 +271,9 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // EAT (ravinto, toimii painonapilla!)
         else if (programState == EAT) {
-            sendMsg(uart, msgEat, strlen(msgEat)); // Testi
+            // messageFxn(msgEat, strlen(msgEat));
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, msgEat, strlen(msgEat));
+            StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -275,7 +282,9 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // PET (hoiva)
         else if (programState == PET) {
-            sendMsg(uart, msgPet, strlen(msgPet)); // Testi
+            // messageFxn(msgPet, strlen(msgPet));
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, msgPet, strlen(msgPet));
+            StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -284,7 +293,9 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // EXERCISE (liikunta)
         else if (programState == EXERCISE) {
-            sendMsg(uart, msgExercise, strlen(msgExercise)); // Testi
+            // messageFxn(msgExercise, strlen(msgExercise));
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, msgExercise, strlen(msgExercise));
+            StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -293,7 +304,9 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // ACTIVATE
         else if (programState == ACTIVATE) {
-            sendMsg(uart, msgActivate, strlen(msgActivate)); // Testi
+            // messageFxn(msgActivate, strlen(msgActivate));
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, msgActivate, strlen(msgActivate));
+            StartReceive6LoWPAN();
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -306,13 +319,15 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
             PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
 
-            sendMsg(uart, msgGameOver, strlen(msgGameOver)); // Testi
+            // messageFxn(msgGameOver, strlen(msgGameOver));
+            Send6LoWPAN(IEEE80154_SERVER_ADDR, msgGameOver, strlen(msgGameOver));
+            StartReceive6LoWPAN();
 
             buzzerGameOver(); // musiikki
         }
 
         // Taski nukkumaan
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(2000000 / Clock_tickPeriod);
     }
 }
 
@@ -431,7 +446,8 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // EXERCISE
-        if (sisainenState == TILA_LIIKKUU) {
+        if (sisainenState == TILA_LIIKKUU && liikunta < 10) {
+            liikunta++;
             sprintf(debug_msg, "%s", "\nEXERCISE");
             System_printf(debug_msg);
             System_flush();
@@ -440,7 +456,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // sensorTag on pimeässä
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 5) {
+        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 15) {
             sisainenState = TILA_PIMEA;
         }
 
@@ -450,7 +466,8 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         // PET
-        if (sisainenState == TILA_PIMEA) {
+        if (sisainenState == TILA_PIMEA && hoiva < 10) {
+            hoiva++;
             sprintf(debug_msg, "%s", "\nPET");
             System_printf(debug_msg);
             System_flush();
@@ -464,7 +481,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             sprintf(debug_msg, "%s", "\nACTIVATE");
             System_printf(debug_msg);
             System_flush();
-            /*
             if (ravinto < 10) {
                 ravinto++;
             }
@@ -474,7 +490,6 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             if (liikunta < 10) {
                 liikunta++;
             }
-            */
             programState = ACTIVATE;
         }
 
@@ -509,7 +524,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         debugFxn();
 
         // Taski nukkumaan
-        Task_sleep(1000000 / Clock_tickPeriod);
+        Task_sleep(2000000 / Clock_tickPeriod);
     }
     // PIN_setOutputValue(MpuPinHandle, Board_MPU_POWER, Board_MPU_POWER_OFF);
 }
@@ -521,20 +536,36 @@ void debugFxn(void) {
     System_printf("\nliikunta: %d", liikunta);
 }
 
-void uartFxn(UART_Handle handle, void *rxBuf, size_t len) {
-    if (buffCount < RXBUFLEN) {
-        strncat(uartStr, rxBuf, RXBUFLEN);
-        buffCount++;
-    } else if (buffCount < (RXBUFLEN * 2)) {
-        strncat(uartStr2, rxBuf, RXBUFLEN);
-        buffCount++;
-    }
-    UART_read(handle, rxBuf, 1);
-}
+// Tiedonsiirtotaski
+void commTaskFxn(UArg arg0, UArg arg1) {
 
-// Viestitys uartilla
-void sendMsg(UART_Handle handle, char *msg, int length) {
-    UART_write(handle, msg, length + 1);
+    char payload[16]; // viestipuskuri
+    uint16_t senderAddr;
+
+    // Radio alustetaan vastaanottotilaan
+    int32_t result = StartReceive6LoWPAN();
+    if (result != true) {
+        System_abort("Wireless receive start failed");
+    }
+
+    // Vastaanotetaan viestejä loopissa
+    while (true) {
+
+        // HUOM! VIESTEJÄ EI SAA LÄHETTÄÄ TÄSSÄ SILMUKASSA
+        // Viestejä lähtee niin usein, että se tukkii laitteen radion ja
+        // kanavan kaikilta muilta samassa harjoituksissa olevilta!!
+
+        // jos true, viesti odottaa
+        if (GetRXFlag()) {
+            // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
+            memset(payload, 0, 16);
+            // Luetaan viesti puskuriin payload
+            Receive6LoWPAN(&senderAddr, payload, 16);
+            // Tulostetaan vastaanotettu viesti konsoli-ikkunaan
+            System_printf(payload);
+            System_flush();
+        }
+    } // HUOM NO TASK_SLEEP
 }
 
 int main(void) {
@@ -543,6 +574,8 @@ int main(void) {
     Task_Params sensorTaskParams;
     Task_Handle uartTaskHandle;
     Task_Params uartTaskParams;
+    Task_Handle commTaskHandle;
+    Task_Params commTaskParams;
 
     // Initialize board
     Board_initGeneral();
@@ -597,6 +630,16 @@ int main(void) {
     uartTaskParams.priority = 2;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
     if (uartTaskHandle == NULL) {
+        System_abort("Task create failed!");
+    }
+
+    /* Communication Task */
+    Task_Params_init(&commTaskParams);
+    commTaskParams.stackSize = STACKSIZE;
+    commTaskParams.stack = &commTaskStack;
+    commTaskParams.priority = 1; // Important to set the priority to 1
+    commTaskHandle = Task_create(commTaskFxn, &commTaskParams, NULL);
+    if (commTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 

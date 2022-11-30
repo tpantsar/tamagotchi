@@ -16,7 +16,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.CC2650F128.ccxml.Texas Instruments XDS110 USB Debug Probe/Cortex_M3_0" value="${build_artifact:empty_CC2650STK_TI}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.CC2650F128.ccxml.Texas Instruments XDS110 USB Debug Probe/Cortex_M3_0" value="empty_CC2650STK_TI"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:empty_CC2650STK_TI}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.CC2650F128.ccxml.Texas Instruments XDS110 USB Debug Probe/Cortex_M3_0" value="C:\Users\tomi_\Desktop\jtkj-harjoitustyo-v2\Debug\empty_CC2650STK_TI.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.CC2650F128.ccxml.Texas Instruments XDS110 USB Debug Probe/Cortex_M3_0" value="C:\Users\tomi_\Desktop\jtkj-harjoitustyo\Debug\empty_CC2650STK_TI.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/empty_CC2650STK_TI"/>
 </listAttribute>

@@ -5,28 +5,28 @@
 #include <stdio.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
+#include <ti/drivers/Power.h>
+#include <ti/drivers/UART.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
+#include <ti/drivers/pin/PINCC26XX.h>
+#include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/i2c/I2CCC26XX.h>
-#include <ti/drivers/pin/PINCC26XX.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/Power.h>
-#include <ti/drivers/power/PowerCC26XX.h>
-#include <ti/drivers/UART.h>
 
 /* Board Header files */
 #include "Board.h"
-#include "wireless/comm_lib.h"
-#include "sensors/opt3001.h"
-#include "sensors/mpu9250.h"
-#include "sensors/tmp007.h"
 #include "buzzer.h"
+#include "sensors/mpu9250.h"
+#include "sensors/opt3001.h"
+#include "sensors/tmp007.h"
+#include "wireless/comm_lib.h"
 #include <driverlib/aon_batmon.h> //patteri
 
 /* Task */
@@ -63,14 +63,12 @@ char uartStr2[BLENGTH]; // viesti2 - 1 viesti ei aina riita, (niita tulee 1-3 ke
 char radioBuffer[160];  // testi radioviesti vastaanotto
 char tulosteluStr[100];
 
-enum moves
-{
+enum moves {
     PRIMARY = 0,
     SECONDARY
 };
 enum moves moveState = PRIMARY;
-enum state
-{
+enum state {
     STOP = 0,
     WAITING,
     DATA_READY,
@@ -82,8 +80,7 @@ enum state
 }; // STOP -> liikkeentunnistus pois paalta
 enum state programState = WAITING;
 
-enum communication
-{
+enum communication {
     RADIO = 0,
     GATEWAY
 };
@@ -147,59 +144,44 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
     .pinSCL = Board_I2C0_SCL1};
 
 // Primary liikkeet default (1piippaus ja alaledi paalla) - Secondary (2piippausta ja alaled off)
-void buttonFxn(PIN_Handle handle, PIN_Id pinId)
-{
-    if (moveState == PRIMARY)
-    {
+void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
+    if (moveState == PRIMARY) {
         PIN_setOutputValue(ledHandle, Board_LED0, 0);
         moveState = SECONDARY; // secondary moves (alaledi off - kaksi piippausta): AKTIVOI,HOIVAA
 
-        if (aaniState == SILENCE)
-        {
+        if (aaniState == SILENCE) {
             aaniState = TWOBEEPS;
         }
-    }
-    else
-    {
+    } else {
         PIN_setOutputValue(ledHandle, Board_LED0, 1);
         moveState = PRIMARY; // primary moves (alaled on - yksi piippaus):RUOKI,LEIKI,LIIKU
 
-        if (aaniState == SILENCE)
-        {
+        if (aaniState == SILENCE) {
             aaniState = ONEBEEP;
         }
     }
 }
 
 // kommunikointi Gateway(defaulttina) 1piippaus - Radio 2 piippausta - Liiketunnistus seis 3 piippausta
-void rightButtonFxn(PIN_Handle handle, PIN_Id pinId)
-{
-    if (programState == STOP)
-    {
+void rightButtonFxn(PIN_Handle handle, PIN_Id pinId) {
+    if (programState == STOP) {
         programState = DATA_READY;
         commState = GATEWAY;
-        if (aaniState == SILENCE)
-        {
+        if (aaniState == SILENCE) {
             aaniState = ONEBEEP;
         }
         System_printf("liiketunnistus paalla - gateway\n\r");
         System_flush();
-    }
-    else if (commState == GATEWAY)
-    {
+    } else if (commState == GATEWAY) {
         commState = RADIO;
-        if (aaniState == SILENCE)
-        {
+        if (aaniState == SILENCE) {
             aaniState = TWOBEEPS;
         }
         System_printf("liiketunnistus paalla - radio\n\r");
         System_flush();
-    }
-    else
-    {
+    } else {
         programState = STOP;
-        if (aaniState == SILENCE)
-        {
+        if (aaniState == SILENCE) {
             aaniState = THREEBEEPS;
         }
         System_printf("liiketunnistus pysaytetty \n\r");
@@ -208,13 +190,10 @@ void rightButtonFxn(PIN_Handle handle, PIN_Id pinId)
 }
 
 // oikean kyljen kautta katolleen ja takas (tunnistaa katollaan -> oikeakylki)
-int analyseAktivoi()
-{
+int analyseAktivoi() {
     uint8_t i;
-    for (i = 0; i < MAXKOKO; i++)
-    {
-        if (aktivoi(i))
-        {
+    for (i = 0; i < MAXKOKO; i++) {
+        if (aktivoi(i)) {
             return 1;
         }
     }
@@ -222,134 +201,99 @@ int analyseAktivoi()
 }
 
 // lampimassa ja pimeassa hoivataan
-int analyseHoiva()
-{
-    if (temperature > 32 && ambientLight < 0.1)
-    {
+int analyseHoiva() {
+    if (temperature > 32 && ambientLight < 0.1) {
         return 1;
     }
     return 0;
 }
 // tunnistaa vaakatasossa suoritetun ympyr�liikkeen
-int analyseLeiki()
-{
+int analyseLeiki() {
     uint8_t i;
     uint8_t xylos = 0;
     uint8_t y = 0;
     uint8_t xalas = 0;
 
-    for (i = 0; i < MAXKOKO; i++)
-    {
+    for (i = 0; i < MAXKOKO; i++) {
         y += ymove(i);
         xylos += xmoveu(i);
         xalas += xmoved(i);
-        if (xylos > 0 && xalas > 0 && y > 1)
-        {
+        if (xylos > 0 && xalas > 0 && y > 1) {
             return 1;
         }
     }
     return 0;
 }
 // 2-3 hyppya vaakatasosta poydalta
-int analyseLiiku()
-{
+int analyseLiiku() {
     uint8_t i;
     uint8_t counter = 0;
 
-    for (i = 0; i < MAXKOKO; i++)
-    {
-        if (jump(i))
-        {
+    for (i = 0; i < MAXKOKO; i++) {
+        if (jump(i)) {
             counter++;
         }
-        if (counter >= 3)
-        {             // jos 3 suunnanmuutosta (ylos tai alas) globaaleissa muuttujissa (n. 3s sisalla)
-            return 1; // palauttaa true jonka seurauksena muuttujat nollautuu analyseTaskissa
+        if (counter >= 3) { // jos 3 suunnanmuutosta (ylos tai alas) globaaleissa muuttujissa (n. 3s sisalla)
+            return 1;       // palauttaa true jonka seurauksena muuttujat nollautuu analyseTaskissa
         }
     }
     return 0;
 }
 
 // vasemmalle kallistus katolleen ja takas
-int analyseRuoki()
-{
+int analyseRuoki() {
     uint8_t i;
-    for (i = 0; i < MAXKOKO; i++)
-    {
-        if (ruoki(i))
-        {
+    for (i = 0; i < MAXKOKO; i++) {
+        if (ruoki(i)) {
             return 1;
         }
     }
     return 0;
 }
 
-void analyseDataFxn(UArg arg0, UArg arg1)
-{
-    while (1)
-    {
-        if (programState == DATA_READY)
-        {
+void analyseDataFxn(UArg arg0, UArg arg1) {
+    while (1) {
+        if (programState == DATA_READY) {
             /*ensin tarkastetaan monimutkaisempaa dataa ja muutetaan tilaa jos ehdot tayttyy
              *, jos minkaan tilan vaatimukset eivat tayty odotellaan uutta dataa (WAITING)*/
-            if (moveState == PRIMARY)
-            { // primary moves (vasemmasta napista muuttaa primary-secondary)
-                if (analyseLiiku())
-                {
+            if (moveState == PRIMARY) { // primary moves (vasemmasta napista muuttaa primary-secondary)
+                if (analyseLiiku()) {
                     programState = LEIKKI;
-                    if (aaniState == SILENCE)
-                    {
+                    if (aaniState == SILENCE) {
                         aaniState = TWOBEEPS;
                     }
                     nollaaMuuttujat();
-                }
-                else if (analyseLeiki())
-                {
+                } else if (analyseLeiki()) {
                     programState = LEIKI;
-                    if (aaniState == SILENCE)
-                    {
+                    if (aaniState == SILENCE) {
                         aaniState = TWOBEEPS;
                     }
                     nollaaMuuttujat();
-                }
-                else if (analyseRuoki())
-                {
+                } else if (analyseRuoki()) {
                     programState = RUOKI;
-                    if (aaniState == SILENCE)
-                    {
+                    if (aaniState == SILENCE) {
                         aaniState = TWOBEEPS;
                     }
                     nollaaMuuttujat();
-                }
-                else
-                {
+                } else {
                     programState = WAITING;
                 }
-            }
-            else
-            { // secondary moves
-                if (analyseAktivoi())
-                {
+            } else { // secondary moves
+                if (analyseAktivoi()) {
                     programState = AKTIVOI;
-                    if (aaniState == SILENCE)
-                    {
+                    if (aaniState == SILENCE) {
                         aaniState = TWOBEEPS; // liike tunnistettu piippaa 2 kertaa
                     }
                     nollaaMuuttujat();
-                }
-                else if (!isHappy && analyseHoiva())
-                {
+                } else if (!isHappy && analyseHoiva()) {
                     programState = HOIVA;
                     temperature = 0;
                     ambientLight = 1;
                     isHappy = 1; // happy flag -> selviaa yhden laiminlyonnin
-                    if (aaniState == SILENCE)
-                    {
+                    if (aaniState == SILENCE) {
                         aaniState = TWOBEEPS;
                     }
-                }
-                else
-                {
+                } else {
                     programState = WAITING;
                 }
             }
@@ -358,18 +302,13 @@ void analyseDataFxn(UArg arg0, UArg arg1)
     }
 }
 
-void uartFxn(UART_Handle handle, void *rxBuf, size_t len)
-{
+void uartFxn(UART_Handle handle, void *rxBuf, size_t len) {
     // buffcountilla kirjoitus oikeaan merkkijonoon, buffcount nollataan kun viestit luettu
-    if (commState == GATEWAY)
-    {
-        if (buffCount < BLENGTH)
-        {
+    if (commState == GATEWAY) {
+        if (buffCount < BLENGTH) {
             strncat(uartStr, rxBuf, BLENGTH);
             buffCount++;
-        }
-        else if (buffCount < (BLENGTH * 2))
-        {
+        } else if (buffCount < (BLENGTH * 2)) {
             strncat(uartStr2, rxBuf, BLENGTH);
             buffCount++;
         }
@@ -377,22 +316,17 @@ void uartFxn(UART_Handle handle, void *rxBuf, size_t len)
     UART_read(handle, rxBuf, 1);
 }
 
-void sendMsg(UART_Handle handle, char *msg, int length)
-{
-    if (commState == GATEWAY)
-    { // viestitys uartilla
+void sendMsg(UART_Handle handle, char *msg, int length) {
+    if (commState == GATEWAY) { // viestitys uartilla
         UART_write(handle, msg, length + 1);
-    }
-    else
-    {
+    } else {
         Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t *)msg, length); // viestitys radio paalla
         StartReceive6LoWPAN();
     }
 }
 
 /* Task Functions */
-void uartTaskFxn(UArg arg0, UArg arg1)
-{
+void uartTaskFxn(UArg arg0, UArg arg1) {
     UART_Handle uart;
     UART_Params uartParams;
     UART_Params_init(&uartParams);
@@ -406,8 +340,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
     uartParams.stopBits = UART_STOP_ONE;   // 1
     uart = UART_open(Board_UART, &uartParams);
 
-    if (uart == NULL)
-    {
+    if (uart == NULL) {
         System_abort("Error opening the UART\n");
     }
 
@@ -418,15 +351,12 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 
     // Radio alustetaan vastaanottotilaan
     int32_t result = StartReceive6LoWPAN();
-    if (result != true)
-    {
+    if (result != true) {
         System_abort("Wireless receive start failed");
     }
 
-    while (1)
-    {
-        if (commState == RADIO && GetRXFlag())
-        {
+    while (1) {
+        if (commState == RADIO && GetRXFlag()) {
             // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
 
             // Luetaan viesti puskuriin payload
@@ -442,23 +372,18 @@ void uartTaskFxn(UArg arg0, UArg arg1)
         // jos tamagotchi on pidetty aiemmin tyytyvaisena ja taustajarjestelma lahettaa viestin etta se on karkaamassa
         //  readMsg palauttaa 1 -> survive=True
         survive = readMsg(); // lukee taustajarjestelman lahettamat viestit (UART) - radioviesteille tarttee tehda viela jotain.
-        if (survive)
-        {
+        if (survive) {
             sendMsg(uart, messageAktivoi, strlen(messageAktivoi));
-            if (commState == GATEWAY)
-            {
+            if (commState == GATEWAY) {
                 sendMsg(uart, messageVaroitus, strlen(messageVaroitus));
-            }
-            else
-            {
+            } else {
                 sendMsg(uart, messageVaroitusRadio, strlen(messageVaroitusRadio)); // radion kautta toivottiin lyhyita viesteja
             }
             isHappy = 0; // ei ole enaa tyytyvainen
             survive = 0; // flag muutetaan
         }
 
-        switch (programState)
-        {
+        switch (programState) {
         case RUOKI:
             sendMsg(uart, messageRuoki, strlen(messageRuoki));
             programState = WAITING;
@@ -468,12 +393,9 @@ void uartTaskFxn(UArg arg0, UArg arg1)
             programState = WAITING;
             break;
         case HOIVA:
-            if (commState == GATEWAY)
-            {
+            if (commState == GATEWAY) {
                 sendMsg(uart, hoivamsg, strlen(hoivamsg));
-            }
-            else
-            {
+            } else {
                 sendMsg(uart, hoivamsgRadio, strlen(hoivamsgRadio)); // radion kautta lyhyempi viesti
             }
             programState = WAITING;
@@ -496,8 +418,7 @@ void uartTaskFxn(UArg arg0, UArg arg1)
 }
 
 // Taskifunktio
-void sensorTaskFxn(UArg arg0, UArg arg1)
-{
+void sensorTaskFxn(UArg arg0, UArg arg1) {
     // alaledi paalle
     PIN_setOutputValue(ledHandle, Board_LED0, 1);
 
@@ -521,8 +442,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // MPU open i2c
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-    if (i2cMPU == NULL)
-    {
+    if (i2cMPU == NULL) {
         System_abort("Error Initializing I2CMPU\n");
     }
 
@@ -539,8 +459,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // lampomittari setup ja calibraario
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
     Task_sleep(100000 / Clock_tickPeriod);
@@ -549,61 +468,50 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // Avataan yhteys, valoisuusmittari setup ja calibraatio
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
-    
+
     Task_sleep(100000 / Clock_tickPeriod);
     opt3001_setup(&i2c);
     I2C_close(i2c);
 
     double light = -1000; // valimuuttuja,
-    while (1)
-    {
-        if (programState == WAITING)
-        {
+    while (1) {
+        if (programState == WAITING) {
             uint32_t time = Clock_getTicks() / 10000;
 
             // Lampo-SENSORI:n luku n. 3 sekunnin valein
-            if (sensorCounter % 17 == 0)
-            {
+            if (sensorCounter % 17 == 0) {
                 i2c = I2C_open(Board_I2C_TMP, &i2cParams); // muiden sensorien vayla auki
                 temperature = tmp007_get_data(&i2c);       // datan lukemiset globaaliin muuttujaan
                 I2C_close(i2c);                            // datat luettu niin kiinni
             }
 
             // VALOSENSORI:n luku n. 2 sekunnin valein
-            else if (sensorCounter % 11 == 0)
-            {
+            else if (sensorCounter % 11 == 0) {
                 i2c = I2C_open(Board_I2C_TMP, &i2cParams); // muiden sensorien vayla auki
                 light = opt3001_get_data(&i2c);            // datan lukemiset globaaliseen muuttujaan, opt3001 ei meinaa ehtia kaikkea lukea kun haetaan 5 kertaa per sek
-                if (light >= 0)
-                {
+                if (light >= 0) {
                     ambientLight = light; // purkkaratkaisu valomittarin hitauteen, saa parantaa jos keksii miten
                 }
                 I2C_close(i2c); // datat luettu niin kiinni
             }
 
             // LIIKESENSORI:n luku n. 0,2 sekunnin valein
-            else
-            {
+            else {
                 i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);                                                                      // mpu (liiketunnistin) vÃ¤ylÃ¤ auki (vain 1kpl vaylia kerrallaan auki)
                 mpu9250_get_data(&i2cMPU, &accx[index], &accy[index], &accz[index], &gyrox[index], &gyroy[index], &gyroz[index]); // datan lukeminen
 
-                I2C_close(i2cMPU); // mpu (liiketunnistin) vayla kiinni
-                if (index == MAXKOKO - 1)
-                { // sliding window indeksin paivitys
+                I2C_close(i2cMPU);          // mpu (liiketunnistin) vayla kiinni
+                if (index == MAXKOKO - 1) { // sliding window indeksin paivitys
                     index = 0;
-                }
-                else
-                {
+                } else {
                     index++;
                 }
                 // luetaan liikesensori 3 kertaa ennenkuin annetaan lupa analysoida dataa -> DATA_READY
-                if (sensorCounter % 3 == 0 && programState != STOP)
-                {                              // jos liiketunnistuksen keskeytys (oikea nappi) ei ole laitettu paalle niin DATA_READY
-                    programState = DATA_READY; // DATA_READY vasta kun tarpeeksi uutta liikedataa keratty (muiden sensorien luku alkuluvuilla 11 & 17 niin ei hairitse liikekeraysta huonoon aikaan)
+                if (sensorCounter % 3 == 0 && programState != STOP) { // jos liiketunnistuksen keskeytys (oikea nappi) ei ole laitettu paalle niin DATA_READY
+                    programState = DATA_READY;                        // DATA_READY vasta kun tarpeeksi uutta liikedataa keratty (muiden sensorien luku alkuluvuilla 11 & 17 niin ei hairitse liikekeraysta huonoon aikaan)
                 }
             }
         }
@@ -613,8 +521,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-int main(void)
-{
+int main(void) {
     // Task variables
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
@@ -635,32 +542,26 @@ int main(void)
     Board_initI2C();
 
     mpuHandle = PIN_open(&mpuState, mpuConfig);
-    if (mpuHandle == NULL)
-    {
+    if (mpuHandle == NULL) {
         System_abort("Pin open failed!");
     }
 
     buttonHandle = PIN_open(&buttonState, buttonConfig);
-    if (!buttonHandle)
-    {
+    if (!buttonHandle) {
         System_abort("Error initializing button pins\n");
     }
     rightButtonHandle = PIN_open(&rightButtonState, rightButtonConfig);
-    if (!rightButtonHandle)
-    {
+    if (!rightButtonHandle) {
         System_abort("Error initializing button pins\n");
     }
     ledHandle = PIN_open(&ledState, ledConfig);
-    if (!ledHandle)
-    {
+    if (!ledHandle) {
         System_abort("Error initializing LED pins\n");
     }
-    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0)
-    {
+    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering left button callback function");
     }
-    if (PIN_registerIntCb(rightButtonHandle, &rightButtonFxn) != 0)
-    {
+    if (PIN_registerIntCb(rightButtonHandle, &rightButtonFxn) != 0) {
         System_abort("Error registering right button callback function");
     }
     // sensoreitten lukeminen globaaleihin muuttujiin
@@ -669,8 +570,7 @@ int main(void)
     sensorTaskParams.stack = &sensorTaskStack;
     sensorTaskParams.priority = 2;
     sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
-    if (sensorTaskHandle == NULL)
-    {
+    if (sensorTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -680,8 +580,7 @@ int main(void)
     analyseDataTaskParams.stack = &analyseDataTaskStack;
     analyseDataTaskParams.priority = 2;
     analyseDataTaskHandle = Task_create(analyseDataFxn, &analyseDataTaskParams, NULL);
-    if (analyseDataTaskHandle == NULL)
-    {
+    if (analyseDataTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -691,8 +590,7 @@ int main(void)
     uartTaskParams.stack = &uartTaskStack;
     uartTaskParams.priority = 1;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
-    if (uartTaskHandle == NULL)
-    {
+    if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -704,8 +602,7 @@ int main(void)
     aaniTaskParams.stack = &aaniTaskStack;
     aaniTaskParams.priority = 2;
     aaniTaskHandle = Task_create(aaniTask, &aaniTaskParams, NULL);
-    if (aaniTaskHandle == NULL)
-    {
+    if (aaniTaskHandle == NULL) {
         System_abort("Task create failed");
     }
 

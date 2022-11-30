@@ -3,27 +3,27 @@
 #include <stdio.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
-#include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/knl/Clock.h>
-#include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
 #include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
 #include <ti/drivers/Power.h>
+#include <ti/drivers/UART.h>
+#include <ti/drivers/pin/PINCC26XX.h>
 #include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/mw/display/Display.h>
 #include <ti/mw/display/DisplayExt.h>
-#include <ti/drivers/UART.h>
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
 
 /* Board Header files */
 #include "Board.h"
 
-#include "wireless/comm_lib.h"
 #include "sensors/opt3001.h"
+#include "wireless/comm_lib.h"
 
 /* Task */
 #define STACKSIZE 2048
@@ -51,15 +51,13 @@ PIN_Config ledConfig[] = {
     PIN_TERMINATE // Taulukko lopetetaan aina t�ll� vakiolla
 };
 
-void buttonFxn(PIN_Handle handle, PIN_Id pinId)
-{
+void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
     // Vaihdetaan led-pinnin tilaa negaatiolla
     PIN_setOutputValue(ledHandle, Board_LED1, !PIN_getOutputValue(Board_LED1));
 }
 
 /* Task Functions */
-void labTaskFxn(UArg arg0, UArg arg1)
-{
+void labTaskFxn(UArg arg0, UArg arg1) {
     I2C_Handle i2c;
     I2C_Params i2cParams;
 
@@ -73,8 +71,7 @@ void labTaskFxn(UArg arg0, UArg arg1)
     I2C_Params_init(&i2cParams);
     i2cParams.bitRate = I2C_400kHz;
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
 
@@ -91,8 +88,7 @@ void labTaskFxn(UArg arg0, UArg arg1)
 
     Display_Handle displayHandle = Display_open(Display_Type_LCD, &params);
 
-    if (displayHandle)
-    {
+    if (displayHandle) {
         Display_print0(displayHandle, 5, 3, "Shall we play");
         Display_print0(displayHandle, 6, 5, "..a game?");
 
@@ -115,13 +111,11 @@ void labTaskFxn(UArg arg0, UArg arg1)
     uartParams.stopBits = UART_STOP_ONE;   // 1
 
     uart = UART_open(Board_UART0, &uartParams);
-    if (uart == NULL)
-    {
+    if (uart == NULL) {
         System_abort("Error opening the UART");
     }
 
-    while (1)
-    {
+    while (1) {
         // JTKJ: Teht�v� 2. Lue sensorilta dataa ja tulosta se Debug-ikkunaan
         // JTKJ: Exercise 2. Read sensor data and print it to the Debug window
         // opt3001_get_data(&i2c);
@@ -167,8 +161,7 @@ void commTaskFxn(UArg arg0, UArg arg1) {
 }
 */
 
-Int main(void)
-{
+Int main(void) {
     // Task variables
     Task_Handle labTask;
     Task_Params labTaskParams;
@@ -191,20 +184,17 @@ Int main(void)
     // JTKJ: Teht�v� 1. Painonappi- ja ledipinnit k�ytt��n t�ss�
     // JTKJ: Exercise 1. Open and configure the button and led pins here
     buttonHandle = PIN_open(&buttonState, buttonConfig);
-    if (!buttonHandle)
-    {
+    if (!buttonHandle) {
         System_abort("Error initializing button pins\n");
     }
     ledHandle = PIN_open(&ledState, ledConfig);
-    if (!ledHandle)
-    {
+    if (!ledHandle) {
         System_abort("Error initializing LED pins\n");
     }
 
     // JTKJ: Teht�v� 1. Rekister�i painonapille keskeytyksen k�sittelij�funktio
     // JTKJ: Exercise 1. Register the interrupt handler for the button
-    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0)
-    {
+    if (PIN_registerIntCb(buttonHandle, &buttonFxn) != 0) {
         System_abort("Error registering button callback function");
     }
 
@@ -215,8 +205,7 @@ Int main(void)
     labTaskParams.priority = 2;
 
     labTask = Task_create(labTaskFxn, &labTaskParams, NULL);
-    if (labTask == NULL)
-    {
+    if (labTask == NULL) {
         System_abort("Task create failed!");
     }
 

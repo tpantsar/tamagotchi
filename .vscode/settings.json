@@ -6,6 +6,10 @@
         "*.py": "python",
         "buzzer.h": "c",
         "board.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "inttypes.h": "c",
+        "string.h": "c",
+        "comm_lib.h": "c",
+        "time.h": "c"
     }
 }

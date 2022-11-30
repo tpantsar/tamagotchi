@@ -5,40 +5,40 @@
  */
 
 /* C Standard library */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* XDCtools files */
-#include <xdc/std.h>
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* BIOS Header files */
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/PIN.h>
+#include <ti/drivers/Power.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
+#include <ti/drivers/pin/PINCC26XX.h>
+#include <ti/drivers/power/PowerCC26XX.h>
+#include <ti/mw/display/Display.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/Power.h>
-#include <ti/drivers/power/PowerCC26XX.h>
-#include <ti/drivers/i2c/I2CCC26XX.h>
-#include <ti/mw/display/Display.h>
 
 /* Board Header files */
 #include "Board.h"
-#include "wireless/comm_lib.h"
-#include "wireless/address.h"
-#include "sensors/mpu9250.h"
-#include "sensors/tmp007.h"
-#include "sensors/opt3001.h"
 #include "sensors/buzzer.h"
+#include "sensors/mpu9250.h"
+#include "sensors/opt3001.h"
+#include "sensors/tmp007.h"
+#include "wireless/address.h"
+#include "wireless/comm_lib.h"
 
 /* mylib */
-#include "mylib/mylib.h"
 #include "mylib/config.h"
 #include "mylib/display_helper.h"
+#include "mylib/mylib.h"
 
 #define STACKSIZE05K 512
 #define STACKSIZE1K 1024
@@ -76,15 +76,13 @@ double last_temp;
 uint8_t tempUpdateFlag = 0;
 uint8_t luxUpdateFlag = 0;
 
-enum command
-{
+enum command {
     PET = 0,
     EXERCISE,
     EAT,
     ACTIVATE
 };
-enum state
-{
+enum state {
     STOP = 0,
     WAITING,
     READ_DATA
@@ -137,15 +135,13 @@ PIN_Config button1Config[] = {
     Board_BUTTON1 | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
     PIN_TERMINATE};
 
-void displayTask(UArg arg0, UArg arg1)
-{
+void displayTask(UArg arg0, UArg arg1) {
     Display_Params params;
     Display_Params_init(&params);
     params.lineClearMode = DISPLAY_CLEAR_BOTH;
     Display_Handle displayHandle = Display_open(Display_Type_LCD, &params);
 
-    if (displayHandle == NULL)
-    {
+    if (displayHandle == NULL) {
         System_abort("Error initializing LCD Screen\n");
     }
 
@@ -162,8 +158,7 @@ void displayTask(UArg arg0, UArg arg1)
     for (i = 0; i < 12; i++)
         Display_print0(displayHandle, i, 0, currentMenu->row[i]);
     uint8_t cursorPosition = 0;
-    while (1)
-    {
+    while (1) {
         updateMenu(currentMenu, cursorPosition++);
         for (i = 0; i < 12; i++)
             Display_print0(displayHandle, i, 0, currentMenu->row[i]);
@@ -171,11 +166,9 @@ void displayTask(UArg arg0, UArg arg1)
     }
 }
 
-void buzzer(uint16_t freq, uint16_t count, uint16_t step)
-{
+void buzzer(uint16_t freq, uint16_t count, uint16_t step) {
     uint16_t i = 0;
-    for (; i < count; i++)
-    {
+    for (i; i < count; i++) {
         buzzerOpen(buzzerHandle);
         buzzerSetFrequency(freq);
         Task_sleep(step * MS / Clock_tickPeriod);
@@ -184,79 +177,66 @@ void buzzer(uint16_t freq, uint16_t count, uint16_t step)
     }
 }
 
-void sendCmd(uint8_t cmd, uint8_t amount)
-{
+void sendCmd(uint8_t cmd, uint8_t amount) {
     uint8_t *msg = cmdStr(cmd, amount);
-    if (msg == NULL)
-    {
+    if (msg == NULL) {
         return;
     }
 
     Send6LoWPAN(IEEE80154_SERVER_ADDR, msg, strlen(msg));
     // set radio back to receiving mode
     StartReceive6LoWPAN();
-    if (msg != NULL)
-    {
+    if (msg != NULL) {
         free(msg);
     }
 }
 
-void sendCustomMsg(uint8_t cmd, uint8_t status)
-{
+void sendCustomMsg(uint8_t cmd, uint8_t status) {
     uint8_t *msg = customMsg(cmd, status);
-    if (msg == NULL)
-    {
+    if (msg == NULL) {
         return;
     }
 
     Send6LoWPAN(IEEE80154_SERVER_ADDR, msg, strlen(msg));
     // set radio back to receiving mode
     StartReceive6LoWPAN();
-    if (msg != NULL)
-    {
+    if (msg != NULL) {
         free(msg);
     }
 }
-void updatePetNeedFlags(uint8_t actions)
-{
-    if (actions & 0x1)
-    {
+
+void updatePetNeedFlags(uint8_t actions) {
+    if (actions & 0x1) {
         buzzPetAlert = 1;
         ++petNeedFlags[0];
         System_printf("NEW ALERT:PET!\n");
         System_flush();
     }
-    if (actions & 0x2)
-    {
+    if (actions & 0x2) {
         buzzExerAlert = 1;
         ++petNeedFlags[1];
         System_printf("NEW ALERT:EXERCISE!\n");
         System_flush();
     }
-    if (actions & 0x4)
-    {
+    if (actions & 0x4) {
         buzzEatAlert = 1;
         ++petNeedFlags[2];
         System_printf("NEW ALERT:EAT!\n");
         System_flush();
     }
-    if (actions & 0x8)
-    {
+    if (actions & 0x8) {
         buzzPetFull = 1;
         ++petNeedFlags[3];
     }
-    if (actions & 0x10)
-    {
+    if (actions & 0x10) {
         buzzExerFull = 1;
         ++petNeedFlags[4];
     }
-    if (actions & 0x20)
-    {
+    if (actions & 0x20) {
         buzzEatFull = 1;
         ++petNeedFlags[5];
     }
-    if (buzzPetFull || buzzExerFull || buzzEatFull)
-    {
+    if (buzzPetFull || buzzExerFull || buzzEatFull) {
         playMusicFlag = 1;
         buzzPetFull = 0;
         buzzExerFull = 0;
@@ -264,33 +244,22 @@ void updatePetNeedFlags(uint8_t actions)
     }
 }
 
-void menuTaskFxn(UArg arg0, UArg arg1)
-{
-    while (1)
-    {
-        if ((programState == WAITING) || (programState == READ_DATA))
-        {
-            if (luxUpdateFlag)
-            {
+void menuTaskFxn(UArg arg0, UArg arg1) {
+    while (1) {
+        if ((programState == WAITING) || (programState == READ_DATA)) {
+            if (luxUpdateFlag) {
                 luxUpdateFlag = 0;
-                if (last_lux > DAY)
-                {
+                if (last_lux > DAY) {
                     sendCustomMsg(0, 0);
-                }
-                else
-                {
+                } else {
                     sendCustomMsg(0, 1);
                 }
             }
-            if (tempUpdateFlag)
-            {
+            if (tempUpdateFlag) {
                 tempUpdateFlag = 0;
-                if (last_temp > COLD)
-                {
+                if (last_temp > COLD) {
                     sendCustomMsg(1, 2);
-                }
-                else
-                {
+                } else {
                     sendCustomMsg(1, 3);
                 }
             }
@@ -300,8 +269,7 @@ void menuTaskFxn(UArg arg0, UArg arg1)
 }
 
 /* SENSOR TASK */
-void sensorTaskFxn(UArg arg0, UArg arg1)
-{
+void sensorTaskFxn(UArg arg0, UArg arg1) {
     float ax, ay, az, gx, gy, gz;
     double Z_TRESHOLD = 0.25;
     double ACC_TRESHOLD = 0.15;
@@ -318,10 +286,10 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
 
     // open I2CMPU
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-    if (i2cMPU == NULL)
-    {
+    if (i2cMPU == NULL) {
         System_abort("Error Initializing I2CMPU\n");
     }
+
     // POWER ON MPU
     PIN_setOutputValue(hMpuPin, Board_MPU_POWER, Board_MPU_POWER_ON);
     // Sleep 100 ms
@@ -340,10 +308,10 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     I2C_Params i2cParams;
     I2C_Params_init(&i2cParams);
     i2cParams.bitRate = I2C_400kHz;
+
     // open I2C
     i2c = I2C_open(Board_I2C, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C for temp007 and OPT3001\n");
     }
     tmp007_setup(&i2c);
@@ -356,25 +324,21 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     System_flush();
 
     /*  SENSOR LOOP */
-    while (1)
-    {
+    while (1) {
         i2c = I2C_open(Board_I2C, &i2cParams);
         // temp = tmp007_get_data(&i2c);
         // lux = opt3001_get_data(&i2c);
         I2C_close(i2c);
-        if ((temp > 0.0) && (temp != last_temp))
-        {
+        if ((temp > 0.0) && (temp != last_temp)) {
             last_temp = temp;
             tempUpdateFlag = 1;
         }
-        if ((lux > 0.0) && (lux != last_lux))
-        {
+        if ((lux > 0.0) && (lux != last_lux)) {
             last_lux = lux;
             luxUpdateFlag = 1;
         }
 
-        if (programState == READ_DATA)
-        {
+        if (programState == READ_DATA) {
             double axPositiveSum = 0;
             double axPositiveCount = 0;
             double ayPositiveSum = 0;
@@ -386,26 +350,23 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             uint8_t i;
             buzzer(2500, 2, 150);
             i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-            for (i = 0; i < SAMPLES; i++)
-            {
+            
+            for (i = 0; i < SAMPLES; i++) {
                 mpu9250_get_data(&i2cMPU, &ax, &ay, &az, &gx, &gy, &gz);
                 sensordata[i][0] = ax;
                 sensordata[i][1] = ay;
                 sensordata[i][2] = az;
                 Task_sleep(MEAS_SLEEP * MS / Clock_tickPeriod);
 
-                if (ax > 0)
-                {
+                if (ax > 0) {
                     axPositiveSum = axPositiveSum + ax;
                     axPositiveCount++;
                 }
-                if (ay > 0)
-                {
+                if (ay > 0) {
                     ayPositiveSum = ayPositiveSum + ay;
                     ayPositiveCount++;
                 }
-                if (az > -1)
-                {
+                if (az > -1) {
                     azPositiveSum = azPositiveSum + az + 1;
                     azPositiveCount++;
                 }
@@ -419,35 +380,27 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
             uint8_t z_count = (uint8_t)(azPositiveAvg / Z_TRESHOLD);
 
             // Lift up
-            if (z_count)
-            {
+            if (z_count) {
                 System_printf("LIFT UP\n");
                 System_printf("EXERCISE\n");
                 System_flush();
                 sendCmd(EXERCISE, z_count);
                 buzzer(3500, z_count, 50);
-            }
-            else if ((x_count == y_count) && (x_count || y_count))
-            {
-                if (axPositiveAvg > ayPositiveAvg)
-                {
+            } else if ((x_count == y_count) && (x_count || y_count)) {
+                if (axPositiveAvg > ayPositiveAvg) {
                     System_printf("SLIDE HORIZONTALLY\n");
                     System_printf("EAT\n");
                     System_flush();
                     sendCmd(EAT, x_count);
                     buzzer(2500, x_count, 50);
-                }
-                else
-                {
+                } else {
                     System_printf("SLIDE VERTICALLY\n");
                     System_printf("PET\n");
                     System_flush();
                     sendCmd(PET, y_count);
                     buzzer(6000, y_count, 50);
                 }
-            }
-            else if (x_count > y_count)
-            {
+            } else if (x_count > y_count) {
                 System_printf("SLIDE HORIZONTALLY\n");
                 System_printf("EAT\n");
                 System_flush();
@@ -455,16 +408,13 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
                 buzzer(2500, x_count, 50);
             }
 
-            else if (y_count > x_count)
-            {
+            else if (y_count > x_count) {
                 System_printf("SLIDE VERTICALLY\n");
                 System_printf("PET\n");
                 System_flush();
                 sendCmd(PET, y_count);
                 buzzer(6000, y_count, 50);
-            }
-            else
-            {
+            } else {
                 System_printf("STATIONARY\n");
                 System_flush();
             }
@@ -473,8 +423,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-void buzzTaskFxn(UArg arg0, UArg arg1)
-{
+void buzzTaskFxn(UArg arg0, UArg arg1) {
     /* Startup Buzz sound */
     /*
     buzzerOpen(buzzerHandle);
@@ -487,13 +436,10 @@ void buzzTaskFxn(UArg arg0, UArg arg1)
     buzzerClose();
     */
 
-    while (1)
-    {
-        if (playBuzzFlag)
-        {
+    while (1) {
+        if (playBuzzFlag) {
             playBuzzFlag = 0;
-            if (buzzEatAlert)
-            {
+            if (buzzEatAlert) {
                 buzzEatAlert = 0;
                 buzzerOpen(buzzerHandle);
                 buzzerSetFrequency(2000);
@@ -509,8 +455,7 @@ void buzzTaskFxn(UArg arg0, UArg arg1)
                 buzzerClose();
                 Task_sleep(100 * MS / Clock_tickPeriod);
             }
-            if (buzzExerAlert)
-            {
+            if (buzzExerAlert) {
                 buzzExerAlert = 0;
                 buzzerOpen(buzzerHandle);
                 buzzerSetFrequency(6000);
@@ -526,8 +471,7 @@ void buzzTaskFxn(UArg arg0, UArg arg1)
                 buzzerClose();
                 Task_sleep(100 * MS / Clock_tickPeriod);
             }
-            if (buzzPetAlert)
-            {
+            if (buzzPetAlert) {
                 buzzPetAlert = 0;
                 buzzerOpen(buzzerHandle);
                 buzzerSetFrequency(10000);
@@ -549,43 +493,34 @@ void buzzTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-void button0Fxn(PIN_Handle handle, PIN_Id pinId)
-{
+void button0Fxn(PIN_Handle handle, PIN_Id pinId) {
     programState = READ_DATA;
 }
 
-void button1Fxn(PIN_Handle handle, PIN_Id pinId)
-{
+void button1Fxn(PIN_Handle handle, PIN_Id pinId) {
     programState = STOP;
     // Toggle music on and off
-    if (playMusicFlag)
-    {
+    if (playMusicFlag) {
         playMusicFlag = 0;
-    }
-    else
-    {
+    } else {
         playMusicFlag = 1;
     }
 }
 
-void commTaskFxn(UArg arg0, UArg arg1)
-{
+void commTaskFxn(UArg arg0, UArg arg1) {
     char rxBuffer[RXBUFLEN] = {0};
     uint16_t senderAddr;
     uint16_t receiver = 0;
     int32_t result = StartReceive6LoWPAN();
-    if (result == 0)
-    {
+    if (result == 0) {
         System_abort("Wireless receive start failed");
     }
     System_printf("Wireless init OK\n");
     System_printf("\n");
     System_flush();
 
-    while (1)
-    {
-        if (GetRXFlag())
-        {
+    while (1) {
+        if (GetRXFlag()) {
             memset(rxBuffer, 0, RXBUFLEN);
             receiver = 0;
             uint8_t actions = 0;
@@ -593,13 +528,11 @@ void commTaskFxn(UArg arg0, UArg arg1)
             System_printf(rxBuffer);
             System_printf("\n");
             System_flush();
-            if (senderAddr == IEEE80154_SERVER_ADDR)
-            {
+            if (senderAddr == IEEE80154_SERVER_ADDR) {
                 char msg[80] = {0};
                 strncpy(msg, rxBuffer, 80);
                 actions = parseMsg(msg, &receiver);
-                if (receiver == 280)
-                {
+                if (receiver == 280) {
                     updatePetNeedFlags(actions);
                     newAlertFlag = 1;
                     playBuzzFlag = 1;
@@ -609,17 +542,13 @@ void commTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-void musicTaskFxn(UArg arg0, UArg arg1)
-{
+void musicTaskFxn(UArg arg0, UArg arg1) {
     uint16_t tuneFreqs[] = {1319, 1175, 740, 830, 1109, 988, 587, 659, 988, 880, 554, 659, 880};
     uint16_t tuneTimingsMs[] = {100, 100, 200, 300, 100, 100, 200, 300, 100, 100, 200, 200, 200};
     uint8_t i = 0;
-    while (1)
-    {
-        if (playMusicFlag)
-        {
-            for (i = 0; i < 13; i++)
-            {
+    while (1) {
+        if (playMusicFlag) {
+            for (i = 0; i < 13; i++) {
                 buzzerOpen(buzzerHandle);
                 buzzerSetFrequency(tuneFreqs[i]);
                 Task_sleep(tuneTimingsMs[i] * MS / Clock_tickPeriod);
@@ -633,8 +562,7 @@ void musicTaskFxn(UArg arg0, UArg arg1)
     }
 }
 
-int main(void)
-{
+int main(void) {
     // Initialize board and I2C
     Board_initGeneral();
     Board_initI2C();
@@ -642,26 +570,22 @@ int main(void)
     configMask_t configInUse = getConfigMask();
 
     button0Handle = PIN_open(&button0State, button0Config);
-    if (!button0Handle)
-    {
+    if (!button0Handle) {
         System_abort("Error initializing button0 pins\n");
     }
 
     // Register Button 0 Callback Function
-    if (PIN_registerIntCb(button0Handle, &button0Fxn) != 0)
-    {
+    if (PIN_registerIntCb(button0Handle, &button0Fxn) != 0) {
         System_abort("Error registering button0 callback function");
     }
 
     button1Handle = PIN_open(&button1State, button1Config);
-    if (!button1Handle)
-    {
+    if (!button1Handle) {
         System_abort("Error initializing button0 pins\n");
     }
 
     // Register Button 0 Callback Function
-    if (PIN_registerIntCb(button1Handle, &button1Fxn) != 0)
-    {
+    if (PIN_registerIntCb(button1Handle, &button1Fxn) != 0) {
         System_abort("Error registering button0 callback function");
     }
 
@@ -673,8 +597,7 @@ int main(void)
     menuTaskParams.stack = &menuTaskStack;
     menuTaskParams.priority = 2;
     menuTaskHandle = Task_create(menuTaskFxn, &menuTaskParams, NULL);
-    if (menuTaskHandle == NULL)
-    {
+    if (menuTaskHandle == NULL) {
         System_abort("Menu Task create failed!");
     }
 
@@ -688,14 +611,12 @@ int main(void)
     // MENU TASK HANDLE
     Task_Handle displayHandle = Task_create(displayTask, &displayParams, NULL);
 
-    if (displayHandle == NULL)
-    {
+    if (displayHandle == NULL) {
         System_abort("Task create failed!");
     }
 
     /* SENSOR TASK */
-    if (configInUse & 0x01)
-    {
+    if (configInUse & 0x01) {
         Task_Handle sensorTaskHandle;
         Task_Params sensorTaskParams;
         Task_Params_init(&sensorTaskParams);
@@ -703,15 +624,13 @@ int main(void)
         sensorTaskParams.stack = &sensorTaskStack;
         sensorTaskParams.priority = 2;
         sensorTaskHandle = Task_create(sensorTaskFxn, &sensorTaskParams, NULL);
-        if (sensorTaskHandle == NULL)
-        {
+        if (sensorTaskHandle == NULL) {
             System_abort("MPU9250 SENSOR create failed!");
         }
     }
 
     /* COMM TASK PARAMS AND CONSTRUCT */
-    if (configInUse & 0x10)
-    {
+    if (configInUse & 0x10) {
         Task_Params commParams;
         Task_Params_init(&commParams);
         commParams.stackSize = STACKSIZE2K;
@@ -721,23 +640,20 @@ int main(void)
     }
 
     /* BUZZER TASK */
-    if (configInUse & 0x10)
-    {
+    if (configInUse & 0x10) {
         Task_Handle buzzTaskHandle;
         Task_Params buzzTaskParams;
         Task_Params_init(&buzzTaskParams);
         buzzTaskParams.stackSize = STACKSIZE05K;
         buzzTaskParams.priority = 2;
         buzzTaskHandle = Task_create(buzzTaskFxn, &buzzTaskParams, NULL);
-        if (buzzTaskHandle == NULL)
-        {
+        if (buzzTaskHandle == NULL) {
             System_abort("Buzzer task creation failed!\n");
         }
     }
 
     /* MUSIC TASK */
-    if (configInUse & 0x20)
-    {
+    if (configInUse & 0x20) {
         Task_Params musicTaskParams;
         Task_Handle musicTaskHandle;
         Task_Params_init(&musicTaskParams);
@@ -745,8 +661,7 @@ int main(void)
         musicTaskParams.stack = &musicTaskStack;
         musicTaskParams.priority = 2;
         musicTaskHandle = Task_create(musicTaskFxn, &musicTaskParams, NULL);
-        if (musicTaskHandle == NULL)
-        {
+        if (musicTaskHandle == NULL) {
             System_abort("Task create failed!");
         }
     }

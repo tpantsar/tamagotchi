@@ -8,16 +8,16 @@
  */
 
 /* XDCtools Header files */
-#include <xdc/std.h>
-#include <xdc/runtime/System.h>
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
+#include <xdc/runtime/System.h>
+#include <xdc/std.h>
 
 /* TI-RTOS Header files */
 #include <ti/drivers/I2C.h>
-#include <ti/drivers/i2c/I2CCC26XX.h>
 #include <ti/drivers/PIN.h>
+#include <ti/drivers/i2c/I2CCC26XX.h>
 #include <ti/drivers/pin/PINCC26XX.h>
 #include <ti/mw/display/Display.h>
 #include <ti/mw/display/DisplayExt.h>
@@ -26,9 +26,9 @@
 #include "Board.h"
 
 /* JTKJ Header files */
-#include "wireless/comm_lib.h"
 #include "sensors/bmp280.h"
 #include "sensors/mpu9250.h"
+#include "wireless/comm_lib.h"
 
 #include <math.h>
 
@@ -53,21 +53,18 @@ Display_Handle hDisplay;
 
 /* Structures used by the MPU task */
 // The axis
-struct Direction
-{
+struct Direction {
     float x;
     float y;
     float z;
 };
 // Mean and variance
-struct Threshold
-{
+struct Threshold {
     struct Direction mean;
     struct Direction var;
 };
 // Types of movement: standing, elevator or stairs + actual measured acceleration
-struct Movement
-{
+struct Movement {
     struct Threshold stand;
     struct Threshold elev;
     struct Threshold stair;
@@ -116,8 +113,7 @@ PIN_Config cLed[] = {
     PIN_TERMINATE};
 
 /* Handler for power button */
-void powerButtonFxn(PIN_Handle handle, PIN_Id pinId)
-{
+void powerButtonFxn(PIN_Handle handle, PIN_Id pinId) {
     Display_clear(hDisplay);
     Display_close(hDisplay);
     Task_sleep(1000000 / Clock_tickPeriod);
@@ -129,41 +125,32 @@ void powerButtonFxn(PIN_Handle handle, PIN_Id pinId)
 }
 
 /* Handler for button0 */
-void button0Fxn(PIN_Handle handle, PIN_Id pinId)
-{
+void button0Fxn(PIN_Handle handle, PIN_Id pinId) {
     // Toggles the sensor timer on and off, i.e. toggles sensor data collection
-    if (Clock_isActive(hSensClk))
-    {
+    if (Clock_isActive(hSensClk)) {
         Clock_stop(hSensClk);
-    }
-    else
-    {
+    } else {
         Clock_start(hSensClk);
     }
 }
 
 /* Sensor timer clock handler */
-void sensClkFxn(UArg arg0)
-{
-    if (State == 0)
-    {
+void sensClkFxn(UArg arg0) {
+    if (State == 0) {
         State = 1;
     }
 }
 
 /* Sent message timer clock handler */
-void msgClkFxn(UArg arg0)
-{
-    if (MSG_SENT == 1)
-    {
+void msgClkFxn(UArg arg0) {
+    if (MSG_SENT == 1) {
         MSG_SENT = 0;
         Clock_stop(hMsgClk);
     }
 }
 
 /* FSM Task */
-void FSMTask(UArg arg0, UArg arg1)
-{
+void FSMTask(UArg arg0, UArg arg1) {
     // Count for testing the sensor timer state to prevent unintentional printing
     uint16_t count = 0;
 
@@ -174,13 +161,11 @@ void FSMTask(UArg arg0, UArg arg1)
     char address[7];
 
     hDisplay = Display_open(Display_Type_LCD, &displayParams);
-    if (hDisplay == NULL)
-    {
+    if (hDisplay == NULL) {
         System_abort("Error initializing Display\n");
     }
 
-    if (hDisplay)
-    {
+    if (hDisplay) {
         sprintf(address, "%x", IEEE80154_MY_ADDR);
         Display_print0(hDisplay, 2, 2, address);
 
@@ -206,31 +191,26 @@ void FSMTask(UArg arg0, UArg arg1)
     Display_print0(hDisplay, 11, 13, "OFF");
 
     // Main loop
-    while (1)
-    {
+    while (1) {
         // Check if a new message is available
-        if (State == 0 && GetRXFlag())
-        {
+        if (State == 0 && GetRXFlag()) {
             State = 2;
         }
 
         // Check if sensor timer is running
         // JTKJ: Tarkistus tehdään tässä, koska napin käsittelijäfunktiossa
         // pienikin kosketus Display-funktioihin sai MCU:n jumiin
-        if (State != 1 && Clock_isActive(hSensClk))
-        {
+        if (State != 1 && Clock_isActive(hSensClk)) {
             count = 0;
             Display_clearLine(hDisplay, 9);
         }
         // If the sensor timer isn't running and count is reached, display info on screen
-        else if (count > 9)
-        {
+        else if (count > 9) {
             Display_clearLine(hDisplay, 5);
             Display_print0(hDisplay, 9, 1, "Mittaus POIS");
         }
         // Add to count if the timer isn't running. This prevents unwanted prints on screen
-        else
-        {
+        else {
             count++;
         }
         Task_sleep(10000 / Clock_tickPeriod);
@@ -238,23 +218,19 @@ void FSMTask(UArg arg0, UArg arg1)
 }
 
 /* Communication task */
-void commTask(UArg arg0, UArg arg1)
-{
+void commTask(UArg arg0, UArg arg1) {
     char payload[16];
     uint16_t senderAddr;
 
     // Radio to receive mode
     int32_t result = StartReceive6LoWPAN();
-    if (result != true)
-    {
+    if (result != true) {
         System_abort("Wireless receive mode failed");
     }
 
-    while (1)
-    {
+    while (1) {
         // If there's a new message available
-        if (State == 2)
-        {
+        if (State == 2) {
             // Turn on LED
             PIN_setOutputValue(hLed, Board_LED0, !PIN_getOutputValue(Board_LED0));
 
@@ -270,8 +246,7 @@ void commTask(UArg arg0, UArg arg1)
             State = 0;
 
             // Back to receive mode
-            if (StartReceive6LoWPAN() != true)
-            {
+            if (StartReceive6LoWPAN() != true) {
                 System_abort("Wireless receive mode failed");
             }
 
@@ -280,8 +255,7 @@ void commTask(UArg arg0, UArg arg1)
             PIN_setOutputValue(hLed, Board_LED0, !PIN_getOutputValue(Board_LED0));
         }
         // If stairs have been detected and a cheer hasn't been sent in the last ~20s, send cheer
-        else if (State == 3 && MSG_SENT != 1)
-        {
+        else if (State == 3 && MSG_SENT != 1) {
             sprintf(payload, "%x ON VOIMAA", IEEE80154_MY_ADDR);
             Send6LoWPAN(0xFFFF, &payload, strlen(payload)); // 0xFFFF for broadcast, according to lecture material
 
@@ -293,8 +267,7 @@ void commTask(UArg arg0, UArg arg1)
             State = 0;
 
             // Back to receive mode
-            if (StartReceive6LoWPAN() != true)
-            {
+            if (StartReceive6LoWPAN() != true) {
                 System_abort("Wireless receive mode failed");
             }
         }
@@ -303,8 +276,7 @@ void commTask(UArg arg0, UArg arg1)
 }
 
 /* Task for reading and analysing accelerometer data */
-void MPUTask(UArg arg0, UArg arg1)
-{
+void MPUTask(UArg arg0, UArg arg1) {
     I2C_Handle i2c; // Interface for other sensors
     I2C_Params i2cParams;
     I2C_Handle i2cMPU; // Interface for MPU9250 sensor
@@ -335,8 +307,7 @@ void MPUTask(UArg arg0, UArg arg1)
     i2cMPUParams.custom = (uintptr_t)&i2cMPUCfg;
 
     i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-    if (i2cMPU == NULL)
-    {
+    if (i2cMPU == NULL) {
         System_abort("Error Initializing I2CMPU\n");
     }
 
@@ -359,8 +330,7 @@ void MPUTask(UArg arg0, UArg arg1)
 
     // Open I2C for other sensors
     i2c = I2C_open(Board_I2C, &i2cParams);
-    if (i2c == NULL)
-    {
+    if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
     }
 
@@ -373,18 +343,15 @@ void MPUTask(UArg arg0, UArg arg1)
     I2C_close(i2c);
 
     // Loop indefinitely
-    while (1)
-    {
+    while (1) {
         // Triggered by sensor timer
-        if (State == 1)
-        {
+        if (State == 1) {
             // Stop sensor timer during execution
             Clock_stop(hSensClk);
 
             // Open I2C for other sensors
             i2c = I2C_open(Board_I2C, &i2cParams);
-            if (i2c == NULL)
-            {
+            if (i2c == NULL) {
                 System_abort("Error Initializing I2C\n");
             }
 
@@ -399,8 +366,7 @@ void MPUTask(UArg arg0, UArg arg1)
 
             // MPU open I2C
             i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);
-            if (i2cMPU == NULL)
-            {
+            if (i2cMPU == NULL) {
                 System_abort("Error Initializing I2CMPU\n");
             }
 
@@ -417,38 +383,31 @@ void MPUTask(UArg arg0, UArg arg1)
             // JTKJ: Tunnistus tehdään täällä eikä omassa funktiossaan/taskissaan,
             // koska jostain mystisestä syystä kääntäjä ei anna antaa Move-tietorakennetta parametrinä,
             // vaikka aiemmilla tietorakennetoteutuksilla samanlaiset kutsut toimivat
-            if (data_index >= 19)
-            {
+            if (data_index >= 19) {
                 // Get mean and variance for the datapoints
-                for (data_index = 0; data_index < 20; data_index++)
-                {
+                for (data_index = 0; data_index < 20; data_index++) {
                     Move.acc.mean.x += ax[data_index] / 20.0;
                 }
-                for (data_index = 0; data_index < 20; data_index++)
-                {
+                for (data_index = 0; data_index < 20; data_index++) {
                     Move.acc.var.x += pow((ax[data_index] - Move.acc.mean.x), 2) / 19.0;
                 }
 
                 // If movement is detected as standing, simply clear the line
-                if (Move.acc.var.x <= (1.5 * Move.stand.var.x))
-                {
+                if (Move.acc.var.x <= (1.5 * Move.stand.var.x)) {
                     Display_clearLine(hDisplay, 5);
                 }
                 // If detected as elevator, print a small insult
-                else if (Move.acc.var.x <= (1.5 * Move.elev.var.x))
-                {
+                else if (Move.acc.var.x <= (1.5 * Move.elev.var.x)) {
                     Display_print0(hDisplay, 5, 2, "Laiskimus...");
                 }
                 // If detected as stairs, cheer
-                else if (Move.acc.var.x <= (1.5 * Move.stair.var.x))
-                {
+                else if (Move.acc.var.x <= (1.5 * Move.stair.var.x)) {
                     Display_print0(hDisplay, 5, 1, "Urheilullista!");
                     State = 3;
                     Task_sleep(10000 / Clock_tickPeriod);
                 }
                 // If detection fails, simply clear the line, as with standing
-                else
-                {
+                else {
                     Display_clearLine(hDisplay, 5);
                 }
 
@@ -456,8 +415,7 @@ void MPUTask(UArg arg0, UArg arg1)
                 data_index = 0;
             }
             // If more data needs to be collected, simply add 1 to the index counter
-            else
-            {
+            else {
                 data_index++;
             }
 
@@ -482,8 +440,7 @@ void MPUTask(UArg arg0, UArg arg1)
     PIN_setOutputValue(hMpuPin, Board_MPU_POWER, Board_MPU_POWER_OFF);
 }
 
-Int main(void)
-{
+Int main(void) {
     /* Task variables */
     Task_Handle hCommTask;
     Task_Params commTaskParams;
@@ -498,30 +455,25 @@ Int main(void)
 
     /* Init power button */
     hPowerButton = PIN_open(&sPowerButton, cPowerButton);
-    if (!hPowerButton)
-    {
+    if (!hPowerButton) {
         System_abort("Error initializing power button shut pins\n");
     }
-    if (PIN_registerIntCb(hPowerButton, &powerButtonFxn) != 0)
-    {
+    if (PIN_registerIntCb(hPowerButton, &powerButtonFxn) != 0) {
         System_abort("Error registering power button callback function");
     }
 
     /* Init button0 */
     hButton0 = PIN_open(&sButton0, cButton0);
-    if (!hButton0)
-    {
+    if (!hButton0) {
         System_abort("Error initializing LED button shut pins\n");
     }
-    if (PIN_registerIntCb(hButton0, &button0Fxn) != 0)
-    {
+    if (PIN_registerIntCb(hButton0, &button0Fxn) != 0) {
         System_abort("Error registering LED button callback function");
     }
 
     /* Init Leds */
     hLed = PIN_open(&sLed, cLed);
-    if (!hLed)
-    {
+    if (!hLed) {
         System_abort("Error initializing LED pin\n");
     }
 
@@ -542,8 +494,7 @@ Int main(void)
     MPUTaskParams.priority = 1;
 
     hMPUTask = Task_create(MPUTask, &MPUTaskParams, NULL);
-    if (hMPUTask == NULL)
-    {
+    if (hMPUTask == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -556,8 +507,7 @@ Int main(void)
     commTaskParams.priority = 1;
 
     hCommTask = Task_create(commTask, &commTaskParams, NULL);
-    if (hCommTask == NULL)
-    {
+    if (hCommTask == NULL) {
         System_abort("Task create failed!");
     }
 
@@ -568,22 +518,19 @@ Int main(void)
     FSMTaskParams.priority = 1;
 
     hFSMTask = Task_create(FSMTask, &FSMTaskParams, NULL);
-    if (hFSMTask == NULL)
-    {
+    if (hFSMTask == NULL) {
         System_abort("Task create failed!");
     }
 
     /* Create a sensor timer clock for READ_SENSOR timing; ~3s timeout, ~250ms periods */
     hSensClk = Clock_create((Clock_FuncPtr)sensClkFxn, 3 * 1000000 / Clock_tickPeriod, &sensClkParams, NULL);
-    if (hSensClk == NULL)
-    {
+    if (hSensClk == NULL) {
         System_abort("Clock create failed!");
     }
 
     /* Create a second clock for MSG_SENT timer; ~20s timeout, no period */
     hMsgClk = Clock_create((Clock_FuncPtr)msgClkFxn, 20 * 1000000 / Clock_tickPeriod, &msgClkParams, NULL);
-    if (hMsgClk == NULL)
-    {
+    if (hMsgClk == NULL) {
         System_abort("Clock create failed!");
     }
 
