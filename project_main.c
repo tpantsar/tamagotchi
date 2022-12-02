@@ -1,6 +1,6 @@
 /* JTKJ Harjoitustyö 2022
-    Tomi Pantsar
-    Santeri Heikkinen
+    Tomi Pantsar ; Mixed Role
+    Santeri Heikkinen ; Mixed Role
 */
 
 /* C Standard library */
@@ -26,11 +26,6 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 
-/* TI-RTOS Header files (PWM_Led_example)
-#include <ti/drivers/GPIO.h>
-#include <ti/drivers/PWM.h>
-*/
-
 /* Board Header files */
 #include "Board.h"
 #include "buzzer.h"
@@ -39,53 +34,56 @@
 #include "sensors/tmp007.h"
 #include "wireless/comm_lib.h"
 
+/* Function prototypes */
 void sendMsg(UART_Handle handle, char *msg, int length);
+void uartFxn(UART_Handle handle, void *rxBuf, size_t len);
+void debugFxn(void);
 
 // Merkkijonot taustajärjestelmää varten
-char msgEat[25] = "id:2230,EAT:2";
-char msgPet[25] = "id:2230,PET:2";
-char msgExercise[25] = "id:2230,EXERCISE:2";
-char msgActivate[25] = "id:2230,ACTIVATE:2;2;2";
-char msgWarning[45] = "id:2230,MSG1:Warning!";
-char msgGameOver[25] = "id:2230,MSG1:Game Over!";
+char msgEat[35] = "id:2230,EAT:2,MSG1:Nice meal!";
+char msgPet[35] = "id:2230,PET:2,MSG1:I needed that";
+char msgExercise[40] = "id:2230,EXERCISE:2,MSG1:What a workout!";
+char msgActivate[40] = "id:2230,ACTIVATE:2;2;2,MSG1:Sunshine!";
+char msgWarning[25] = "id:2230,MSG1:Warning!";
 
-#define RXBUFLEN 80
+#define BUFFERLENGTH 80
+
+uint8_t buffCount = 0;
+char uartStr[BUFFERLENGTH];  // MSG1 taustajarjestelmasta
+char uartStr2[BUFFERLENGTH]; // MSG2 taustajarjestelmasta
+uint8_t uartBuffer[30];  // Vastaanottopuskuri
 
 /* Task */
 #define STACKSIZE 4096
 char sensorTaskStack[STACKSIZE];
 char uartTaskStack[STACKSIZE];
 
-uint8_t buffCount = 0;
-char uartStr[RXBUFLEN];  // MSG1 taustajarjestelmasta
-char uartStr2[RXBUFLEN]; // MSG2 taustajarjestelmasta
-
 // Tilakone Tamagotchin toiminnoille
-enum state {
+enum stateTamagotchi {
     WAITING = 1,
     DATA_READY,
     EAT,      // ravinto
     PET,      // hoiva
     EXERCISE, // liikunta
-    ACTIVATE, // EAT, PET, EXERCISE
-    GAMEOVER  // Pelin paattyminen
+    ACTIVATE  // EAT, PET, EXERCISE
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
-enum state programState = WAITING;
+enum stateTamagotchi programState = WAITING;
 
 // Tilakone SensorTagin toiminnoille
-enum tila {
-    TILA_0 = 1,
-    TILA_PAIKALLAAN, // liikesensori
-    TILA_LIIKKUU,    // liikesensori
-    TILA_VALO,       // valosensori
-    TILA_PIMEA,      // valosensori
+enum stateSensor {
+    ODOTUSTILA = 1,
+    SENSOR_STILL,  // liikesensori
+    SENSOR_MOVING, // liikesensori
+    SENSOR_LIGHT,  // valosensori
+    SENSOR_DARK    // valosensori
 };
 // Globaali tilamuuttuja, alustetaan odotustilaan
-enum tila sisainenState = TILA_0;
+enum stateSensor sensorState = ODOTUSTILA;
 
 // Globaalit muuttujat Tamagotchin ominaisuuksille
 double ambientLight = -1000.0;
+double temperature = 0;
 int ravinto = 5;
 int hoiva = 5;
 int liikunta = 5;
@@ -136,100 +134,22 @@ PIN_Config buzzerConfig[] = {
 
 /* Napinpainalluksen keskeytyksen käsittelijäfunktio */
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
-
-    System_printf("\nEAT\n"); // Debug
-    /*char debug[30];
-    sprintf(debug, "button: %s\n", handle);
-    System_printf(debug);
-    System_flush();
-
-    while (handle)
-    {
-        printf("\nnappi pohjassa");
-    }*/
-
-    /*
-    if (ravinto < 10) {
-        ravinto++;
-        System_printf("\nEAT\n"); // Debug
-        System_flush();
-    } else {
-        System_printf("\nMaha taynna!\n"); // Debug
-        System_flush();
-    }
-    */
+    System_printf("\nEAT\n");
     programState = EAT;
-}
-
-// Musiikki hoivalle
-void buzzerPet(void) {
-    /*
-    buzzerOpen(buzzerHandle);
-    buzzerSetFrequency(262); // c
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(262); // c
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(262); // c
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(330); // e
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(294); // d
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(294); // d
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(294); // d
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(349); // f
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(330); // e
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(330); // e
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(294); // d
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(294); // d
-    Task_sleep(250000 / Clock_tickPeriod);
-    buzzerSetFrequency(262); // c
-    Task_sleep(500000 / Clock_tickPeriod);
-    buzzerClose();
-    */
-}
-
-// Musiikki liikunnalle
-void buzzerExercise(void) {
-    /*
-    buzzerOpen(buzzerHandle);
-    buzzerSetFrequency(2000);
-    Task_sleep(50000 / Clock_tickPeriod);
-    buzzerClose();
-    */
 }
 
 // Musiikki varoitukselle
 void buzzerWarning(void) {
-    /*
     buzzerOpen(buzzerHandle);
     buzzerSetFrequency(2000);
-    Task_sleep(50000 / Clock_tickPeriod);
+    Task_sleep(2000000 / Clock_tickPeriod);
     buzzerClose();
-    */
-}
-
-// Musiikki pelin loppumiselle
-void buzzerGameOver(void) {
-    /*
-    buzzerOpen(buzzerHandle);
-    buzzerSetFrequency(2000);
-    Task_sleep(50000 / Clock_tickPeriod);
-    buzzerClose();
-    */
 }
 
 /* Task Functions */
 void uartTaskFxn(UArg arg0, UArg arg1) {
 
     Task_sleep(100000 / Clock_tickPeriod);
-    char echo_msg[50];
 
     UART_Handle uart;
     UART_Params uartParams;
@@ -239,8 +159,8 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
     uartParams.writeDataMode = UART_DATA_TEXT;
     uartParams.readDataMode = UART_DATA_TEXT;
     uartParams.readEcho = UART_ECHO_OFF;
-    uartParams.readMode = UART_MODE_BLOCKING;
-    // uartParams.readCallback = &uartFxn;
+    uartParams.readMode = UART_MODE_CALLBACK;
+    uartParams.readCallback = &uartFxn;    // Kasittelijafunktio
     uartParams.baudRate = 9600;            // nopeus 9600 baud
     uartParams.dataLength = UART_LEN_8;    // 8
     uartParams.parityType = UART_PAR_NONE; // n
@@ -252,10 +172,10 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
         System_abort("Error opening the UART");
     }
 
-    while (1) {
-        // System_printf("\nuartTask\n");
-        // System_flush();
+    // Nyt tarvitsee käynnistää datan odotus
+    UART_read(uart, uartBuffer, 1);
 
+    while (1) {
         if (programState == DATA_READY) {
             programState = WAITING;
         }
@@ -266,7 +186,7 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // EAT (ravinto, toimii painonapilla!)
         else if (programState == EAT) {
-            sendMsg(uart, msgEat, strlen(msgEat)); // Testi
+            sendMsg(uart, msgEat, strlen(msgEat));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -275,7 +195,7 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // PET (hoiva)
         else if (programState == PET) {
-            sendMsg(uart, msgPet, strlen(msgPet)); // Testi
+            sendMsg(uart, msgPet, strlen(msgPet));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -284,7 +204,7 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // EXERCISE (liikunta)
         else if (programState == EXERCISE) {
-            sendMsg(uart, msgExercise, strlen(msgExercise)); // Testi
+            sendMsg(uart, msgExercise, strlen(msgExercise));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
@@ -293,22 +213,11 @@ void uartTaskFxn(UArg arg0, UArg arg1) {
 
         // ACTIVATE
         else if (programState == ACTIVATE) {
-            sendMsg(uart, msgActivate, strlen(msgActivate)); // Testi
+            sendMsg(uart, msgActivate, strlen(msgActivate));
 
             // Punainen ledi päälle
             PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
             programState = WAITING;
-        }
-
-        // GAMEOVER
-        else if (programState == GAMEOVER) {
-            // Molemmat ledit päälle
-            PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
-            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
-
-            sendMsg(uart, msgGameOver, strlen(msgGameOver)); // Testi
-
-            buzzerGameOver(); // musiikki
         }
 
         // Taski nukkumaan
@@ -320,7 +229,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
     // RTOS:n i2c-muuttujat ja alustus
     I2C_Handle i2c;
     I2C_Params i2cParams;
-    I2C_Handle i2cMPU; // Own i2c-interface for MPU9250 sensor
+    I2C_Handle i2cMPU;
     I2C_Params i2cMPUParams;
 
     // Merkkijonomuuttuja tulostuksille
@@ -359,7 +268,7 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
     mpu9250_setup(&i2cMPU);
     I2C_close(i2cMPU);
 
-    // OPT3001 open i2c
+    // OPT3001 and TMP007 open i2c
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
     if (i2c == NULL) {
         System_abort("Error Initializing I2C\n");
@@ -368,18 +277,20 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
     // OPT3001 setup and calibration
     Task_sleep(100000 / Clock_tickPeriod);
     opt3001_setup(&i2c);
+
+    // TMP007 setup and calibration
+    Task_sleep(100000 / Clock_tickPeriod);
+    tmp007_setup(&i2c);
+
     I2C_close(i2c);
 
     while (1) {
-        sprintf(debug_msg, "\n\nprogramState: %d\n", programState);
-        System_printf(debug_msg);
-        System_flush();
-
         if (programState == WAITING) {
+            // Ledit pois päältä
             PIN_setOutputValue(LED0_Handle, Board_LED0, 0);
             PIN_setOutputValue(LED1_Handle, Board_LED1, 0);
 
-            // OPT3001 open i2c
+            // OPT3001 and TMP007 open i2c
             i2c = I2C_open(Board_I2C_TMP, &i2cParams);
 
             // OPT3001 ask data
@@ -388,7 +299,13 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             // Sleep 100ms
             Task_sleep(100000 / Clock_tickPeriod);
 
-            // OPT3001 close i2c
+            // TMP007 ask data
+            temperature = tmp007_get_data(&i2c);
+
+            // Sleep 100ms
+            Task_sleep(100000 / Clock_tickPeriod);
+
+            // OPT3001 and TMP007 close i2c
             I2C_close(i2c);
 
             // MPU open i2c
@@ -404,7 +321,12 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
             I2C_close(i2cMPU);
 
             // Print OPT3001 values (ambientLight)
-            sprintf(debug_msg, "%.2lf luksia\n", ambientLight);
+            sprintf(debug_msg, "\n\n%.2lf luksia\n", ambientLight);
+            System_printf(debug_msg);
+            System_flush();
+
+            // Print TMP007 values (temperature)
+            sprintf(debug_msg, "%.2lf celsius\n", temperature);
             System_printf(debug_msg);
             System_flush();
 
@@ -417,92 +339,52 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
 
         if (programState == DATA_READY) {
-            sisainenState = TILA_0;
+            sensorState = ODOTUSTILA;
         }
 
         // sensorTag on liikkeessä
-        if (sisainenState == TILA_0 && ax < -0.5) {
-            sisainenState = TILA_LIIKKUU;
+        if (sensorState == ODOTUSTILA && ax < -0.5) {
+            sensorState = SENSOR_MOVING;
         }
 
         // sensorTag on paikallaan
-        if ((sisainenState == TILA_0) && (ax < 5) && (ay < 10) && (az < 5)) {
-            sisainenState = TILA_PAIKALLAAN;
+        if ((sensorState == ODOTUSTILA) && (ax < 5) && (ay < 10) && (az < 5)) {
+            sensorState = SENSOR_STILL;
         }
 
         // EXERCISE
-        if (sisainenState == TILA_LIIKKUU) {
+        if (sensorState == SENSOR_MOVING) {
             sprintf(debug_msg, "%s", "\nEXERCISE");
             System_printf(debug_msg);
             System_flush();
-            buzzerExercise(); // musiikki
             programState = EXERCISE;
         }
 
         // sensorTag on pimeässä
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight < 5) {
-            sisainenState = TILA_PIMEA;
+        if (sensorState == SENSOR_STILL && ambientLight < 5) {
+            sensorState = SENSOR_DARK;
         }
 
         // sensorTag on valoisassa
-        if (sisainenState == TILA_PAIKALLAAN && ambientLight > 150) {
-            sisainenState = TILA_VALO;
+        if (sensorState == SENSOR_STILL && ambientLight > 150) {
+            sensorState = SENSOR_LIGHT;
         }
 
         // PET
-        if (sisainenState == TILA_PIMEA) {
+        if (sensorState == SENSOR_DARK && temperature > 35) {
             sprintf(debug_msg, "%s", "\nPET");
             System_printf(debug_msg);
             System_flush();
-            buzzerPet(); // musiikki
             programState = PET;
-            sisainenState = TILA_0;
+            sensorState = ODOTUSTILA;
         }
 
         // ACTIVATE
-        if (sisainenState == TILA_VALO) {
+        if (sensorState == SENSOR_LIGHT) {
             sprintf(debug_msg, "%s", "\nACTIVATE");
             System_printf(debug_msg);
             System_flush();
-            /*
-            if (ravinto < 10) {
-                ravinto++;
-            }
-            if (hoiva < 10) {
-                hoiva++;
-            }
-            if (liikunta < 10) {
-                liikunta++;
-            }
-            */
             programState = ACTIVATE;
-        }
-
-        // WARNING
-        if (ravinto == 2 || hoiva == 2 || liikunta == 2) {
-            sprintf(debug_msg, "%s", "WARNING\n");
-            System_printf(debug_msg);
-            System_flush();
-
-            // Punainen ledi päälle
-            PIN_setOutputValue(LED1_Handle, Board_LED1, 1);
-
-            buzzerWarning(); // musiikki
-
-            // Punainen ledi pois
-            PIN_setOutputValue(LED1_Handle, Board_LED1, 0);
-
-            sisainenState = TILA_0;
-        }
-
-        // GAMEOVER
-        if (ravinto == 0 || hoiva == 0 || liikunta == 0) {
-            sprintf(debug_msg, "%s", "GAMEOVER\n");
-            System_printf(debug_msg);
-            System_flush();
-
-            programState = GAMEOVER;
-            sisainenState = TILA_0;
         }
 
         // Tulostaa tamagotchin ominaisuudet
@@ -511,24 +393,36 @@ void sensorTaskFxn(UArg arg0, UArg arg1) {
         // Taski nukkumaan
         Task_sleep(1000000 / Clock_tickPeriod);
     }
-    // PIN_setOutputValue(MpuPinHandle, Board_MPU_POWER, Board_MPU_POWER_OFF);
 }
 
 // Tulostaa kaikki tamagotchin ominaisuudet konsoliin
 void debugFxn(void) {
-    System_printf("\nravinto: %d", ravinto);
-    System_printf("\nhoiva: %d", hoiva);
-    System_printf("\nliikunta: %d", liikunta);
+    System_printf("\nEAT: %d", ravinto);
+    System_printf("\nPET: %d", hoiva);
+    System_printf("\nEXERCISE: %d", liikunta);
 }
 
+// Viestien vastaanottamisen käsittelijäfunktio
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len) {
-    if (buffCount < RXBUFLEN) {
-        strncat(uartStr, rxBuf, RXBUFLEN);
+    if (buffCount < BUFFERLENGTH) {
+        strncat(uartStr, rxBuf, BUFFERLENGTH);
         buffCount++;
-    } else if (buffCount < (RXBUFLEN * 2)) {
-        strncat(uartStr2, rxBuf, RXBUFLEN);
+    } else if (buffCount < (BUFFERLENGTH * 2)) {
+        strncat(uartStr2, rxBuf, BUFFERLENGTH);
         buffCount++;
     }
+
+    char dest[16];
+    char ourId[10] = "2230,BEEP";
+
+    strncpy(dest, uartStr, 9); // dest = 2230,BEEP
+    dest[9] = 0;               // null terminate destination
+
+    if (strcmp(ourId, dest) == 0) {
+        buzzerWarning(); // varoitusmusiikki
+    }
+
+    // Käsittelijän viimeisenä asiana siirrytään odottamaan uutta keskeytystä
     UART_read(handle, rxBuf, 1);
 }
 
@@ -573,6 +467,12 @@ int main(void) {
     // Ledi käyttöön ohjelmassa
     LED0_Handle = PIN_open(&LED0_State, LED0_ledConfig);
     if (!LED0_Handle) {
+        System_abort("Error initializing LED pins\n");
+    }
+
+    // Ledi käyttöön ohjelmassa
+    LED1_Handle = PIN_open(&LED1_State, LED1_ledConfig);
+    if (!LED1_Handle) {
         System_abort("Error initializing LED pins\n");
     }
 

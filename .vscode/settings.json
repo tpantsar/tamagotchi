@@ -10,6 +10,7 @@
         "inttypes.h": "c",
         "string.h": "c",
         "comm_lib.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "stdlib.h": "c"
     }
 }

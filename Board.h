@@ -34,8 +34,7 @@
 #define __BOARD_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include <ti/drivers/Power.h>
@@ -56,13 +55,12 @@ extern "C"
 #define Board_AES0 Board_AES
 #define Board_WATCHDOG0 CC2650STK_WATCHDOG0
 
-#define Board_initGeneral()                              \
-    {                                                    \
-        Power_init();                                    \
-        if (PIN_init(BoardGpioInitTable) != PIN_SUCCESS) \
-        {                                                \
-            System_abort("Error with PIN_init\n");       \
-        }                                                \
+#define Board_initGeneral()                                \
+    {                                                      \
+        Power_init();                                      \
+        if (PIN_init(BoardGpioInitTable) != PIN_SUCCESS) { \
+            System_abort("Error with PIN_init\n");         \
+        }                                                  \
     }
 
 #define Board_initGPIO()

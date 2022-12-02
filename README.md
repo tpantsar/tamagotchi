@@ -2,10 +2,32 @@ TODO:
 ✅ uartTaskin if (programState == ...) lauseet
 ✅ sensorTaskin if (programState == ...) lauseet
 ✅ liikesensorin datan analysointi
+✅ Alusta etäyhteys!
 🟨 Sävellä musiikit!
-🟨 commTaskin toimivuus
-🟨 Alusta etäyhteys!
 🟨 Selvitä, voiko painonappia painaa pohjassa ja samaan aikaan käyttää liikesensoria
+
+
+Toiminnallisuudet ja niiden ehdot:
+
+* EAT (ravinto)
+  * Painonappi
+  * Voisi liittää esim. TILA_PAIKALLAAN ehdon mukaan?
+* PET (hoiva)
+  * sisainenState == TILA_PIMEA && temperature > 35
+    * sisainenState == TILA_PAIKALLAAN && ambientLight < 5
+      * sisainenState == TILA_0 && ax < 5 && ay < 10 && az < 5
+* EXERCISE (liikunta)
+  * sisainenState == TILA_LIIKKUU
+    * sisainenState == TILA_0 && ax < -0.5
+* ACTIVATE
+  * sisainenState == TILA_VALO
+    * sisainenState == TILA_PAIKALLAAN && ambientLight > 150
+
+
+- Lämpötilasensori lisäksi, kun kasvatetaan hoivaa (PET)
+- Kellofunktio, 10 sekunnin välein ravinto--, hoiva-- ja liikunta--
+- taustajärjestelmän lähettämiin viesteihin reagoiminen
+- Punainen ledi päälle-toiminto pois? Onko turha
 
 
 programState kaavio: sensorTaskista uartTaskiin !

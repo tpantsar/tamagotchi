@@ -1,3 +1,55 @@
+UUSI:
+
+programState: 1
+2.75 luksia
+38.34 celsius
+-0.03, -0.81, -0.45, -148.99, 1.84, -64.76
+
+PET
+ravinto: 5
+hoiva: 5
+liikunta: 5
+
+programState: 1
+56.74 luksia
+38.03 celsius
+0.22, -1.88, -0.06, -141.34, 51.41, -44.74
+
+ravinto: 5
+hoiva: 5
+liikunta: 5
+
+programState: 1
+0.00 luksia
+37.69 celsius
+0.08, 0.52, -0.29, -40.98, 38.55, -113.01
+
+PET
+ravinto: 5
+hoiva: 5
+liikunta: 5
+
+programState: 1
+0.18 luksia
+37.41 celsius
+0.10, -0.08, -0.71, 51.96, -55.91, 182.44
+
+PET
+ravinto: 5
+hoiva: 5
+liikunta: 5
+
+programState: 1
+43.92 luksia
+34.41 celsius
+0.03, 0.01, -0.97, -0.49, 0.11, -0.53
+
+
+
+
+
+VANHA:
+
 [Cortex_M3_0] Hello world!
 MPU9250: Power ON
 
