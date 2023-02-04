@@ -1,3 +1,5 @@
+Lähdekoodi löytyy tiedostosta project_main.c
+
 Konsoliin tulostuu:
 
 0.01 lux
