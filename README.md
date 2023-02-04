@@ -1,5 +1,9 @@
 Lähdekoodi löytyy tiedostosta project_main.c
 
+Yksinkertainen Tamagotchi-käyttöliittymä toteutettu SensorTag CC2650-alustalle. Ohjelmassa on toteutettu perustoimintoja, kuten ravinnon ja energian lisäys, käyttäen painonapeista sekä kiihtyvyys- ja asentoantureista saadun datan perusteella. Kun SensorTagin valosensori rekisteröi tarpeeksi kirkasta valoa, se lisää kaikkia Tamagotchin ominaisuuksia yhdellä.
+
+---------------------------------------------------------
+
 Konsoliin tulostuu:
 
 0.01 lux
@@ -9,6 +13,8 @@ ZzzZzZ...
 ravinto: 9
 leikki: 7
 energia: 7
+
+---------------------------------------------------------
 
 **Toteutusjärjestys**
 
